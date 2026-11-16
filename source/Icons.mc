@@ -50,6 +50,55 @@ module Icons {
         8, 3, 3
     ] as Array<Number>;
 
+    //! Tile row icons, top-aligned (flame and pin traced from the mockup).
+    //! Flame (calories), 6 x 10.
+    const FLAME_W = 6.0;
+    const FLAME_RUNS = [
+        0, 3, 1,
+        1, 2, 3,
+        2, 2, 3,
+        3, 2, 4,
+        4, 0, 1,  4, 2, 4,
+        5, 0, 6,
+        6, 0, 6,
+        7, 0, 6,
+        8, 0, 6,
+        9, 1, 4
+    ] as Array<Number>;
+
+    //! Steps, 9 x 11: two shoe prints, each a forefoot and a separate heel,
+    //! the right one a step lower (owner's choice; the mockup's 8 px prints
+    //! read as two dots).
+    const STEPS_W = 9.0;
+    const STEPS_RUNS = [
+        0, 1, 2,
+        1, 0, 4,  1, 6, 2,
+        2, 0, 4,  2, 5, 4,
+        3, 0, 4,  3, 5, 4,
+        4, 0, 4,  4, 5, 4,
+        5, 1, 2,  5, 5, 4,
+        6, 6, 2,
+        7, 1, 2,
+        8, 1, 2,  8, 6, 2,
+        9, 1, 2,  9, 6, 2,
+        10, 6, 2
+    ] as Array<Number>;
+
+    //! Map pin (distance), 8 x 10, with a hole.
+    const PIN_W = 8.0;
+    const PIN_RUNS = [
+        0, 2, 4,
+        1, 1, 6,
+        2, 1, 2,  2, 5, 2,
+        3, 0, 3,  3, 5, 3,
+        4, 1, 2,  4, 5, 2,
+        5, 1, 6,
+        6, 1, 6,
+        7, 2, 4,
+        8, 3, 2,
+        9, 3, 2
+    ] as Array<Number>;
+
     //! Sunrise and sunset, 12 x 11 (not in the mockup; chosen for legibility on
     //! the MIP screen): a triangle (up = sunrise, down = sunset) in the text
     //! colour, a gap, then a solid half-sun in the accent colour on a horizon line.
@@ -128,6 +177,18 @@ module Icons {
 
     function drawHeart(dc as Dc, left as Float, top as Float, s as Float) as Void {
         drawRuns(dc, HEART_RUNS, left, top, s);
+    }
+
+    function drawFlame(dc as Dc, left as Float, top as Float, s as Float) as Void {
+        drawRuns(dc, FLAME_RUNS, left, top, s);
+    }
+
+    function drawSteps(dc as Dc, left as Float, top as Float, s as Float) as Void {
+        drawRuns(dc, STEPS_RUNS, left, top, s);
+    }
+
+    function drawPin(dc as Dc, left as Float, top as Float, s as Float) as Void {
+        drawRuns(dc, PIN_RUNS, left, top, s);
     }
 
     //! Sunrise (rising = true) or sunset. Two colours, so the caller passes them.

@@ -1,3 +1,4 @@
+import Toybox.ActivityMonitor;
 import Toybox.Complications;
 import Toybox.Graphics;
 import Toybox.Lang;
@@ -111,6 +112,22 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private const BAR_BPM_SPAN = 80.0;
     // History is re-read when a new 10-minute bar starts (allocates; see HeartRateGraph).
     private const GRAPH_REFRESH_MINUTES = 10;
+
+    // ---- Tile row (§2 row 10), measured from the mockup ----
+
+    // Three columns of 52 px from x 52: calories, steps, distance. Icon on top,
+    // value below, all centred on the column. Steps keeps the middle column so
+    // its bar is not cut by the round edge.
+    private const TILE_X = 52.0;
+    private const TILE_W = 52.0;
+    private const TILE_ICON_TOP = 203.0;
+    private const TILE_VALUE_BASELINE = 231.0;
+    private const DISTANCE_UNIT_GAP = 2.0;
+    private const STEPS_BAR_W = 40.0;
+    private const STEPS_BAR_H = 4.0;
+    private const STEPS_BAR_Y = 236.0;
+    private const CM_PER_KM = 100000.0;
+    private const CM_PER_MILE = 160934.4;
 
     // Capital height of date line 1 ("MON 16"), a system vector font.
     private const CAP_13 = 13.0;
@@ -264,6 +281,26 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _hrValueTop as Number = 0;
     private var _hrLabelTop as Number = 0;
 
+    // Tile row: calories, steps (with goal bar), distance in the device's unit.
+    private var _tileCentreX as Array<Float> = [0.0, 0.0, 0.0] as Array<Float>;
+    private var _tileIconTop as Float = 0.0;
+    private var _tileValueTop as Number = 0;
+    private var _tileUnitTop as Number = 0;
+    private var _stepsBarX as Number = 0;
+    private var _stepsBarY as Number = 0;
+    private var _stepsBarW as Number = 0;
+    private var _stepsBarH as Number = 0;
+    private var _caloriesKey as Number = -2;
+    private var _caloriesText as String = "--";
+    private var _stepsKey as Number = -2;
+    private var _stepsText as String = "--";
+    private var _stepsFill as Float = 0.0;
+    private var _distanceKey as Number = -2;
+    private var _distanceText as String = "--";
+    private var _distanceUnit as String = "";
+    private var _distanceTextX as Number = 0;
+    private var _distanceUnitX as Number = 0;
+
     // Body Battery from SensorHistory, used when the complication has no value.
     private var _bodyBatteryHistory as Number? = null;
 
@@ -364,6 +401,18 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _sunIconTop = SUN_ICON_TOP * _sy;
         _sunTimeTop = topForBaseline(SUN_TIME_BASELINE, _sunTimeFont);
 
+        // Tile row
+        for (var i = 0; i < 3; i++) {
+            _tileCentreX[i] = (TILE_X + TILE_W * i + TILE_W / 2) * _sx;
+        }
+        _tileIconTop = TILE_ICON_TOP * _sy;
+        _tileValueTop = topForBaseline(TILE_VALUE_BASELINE, _num12Font);
+        _tileUnitTop = topForBaseline(TILE_VALUE_BASELINE, _labelFont);
+        _stepsBarX = round(_tileCentreX[1] - STEPS_BAR_W * _sx / 2);
+        _stepsBarY = scaleY(STEPS_BAR_Y);
+        _stepsBarW = scaleX(STEPS_BAR_W);
+        _stepsBarH = scaleY(STEPS_BAR_Y + STEPS_BAR_H) - _stepsBarY;
+
         // Heart-rate box
         _heartX = HEART_X * _sx;
         _heartTextX = scaleX(HR_VALUE_X);
@@ -435,6 +484,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             refreshDate(dc, now);
             refreshMoon(dc, now);
             refreshBattery(dc);
+            refreshActivity(dc);
             var slot = minute / GRAPH_REFRESH_MINUTES;
             if (slot != _graphSlot) {
                 _graphSlot = slot;
@@ -461,6 +511,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         drawBodyBatteryBox(dc);
         drawSidePanel(dc);
         drawHeartBox(dc);
+        drawTiles(dc);
         drawTime(dc, clock.sec);
     }
 
@@ -482,6 +533,36 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     }
 
     // ---- Drawing (no allocation) ----
+
+    private function drawTiles(dc as Dc) as Void {
+        var s = _sx;
+
+        // Calories
+        dc.setColor(Palette.ACCENT, Graphics.COLOR_TRANSPARENT);
+        Icons.drawFlame(dc, _tileCentreX[0] - Icons.FLAME_W * s / 2, _tileIconTop, s);
+        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(_tileCentreX[0], _tileValueTop, _num12Font, _caloriesText, Graphics.TEXT_JUSTIFY_CENTER);
+
+        // Steps, with progress toward the goal
+        Icons.drawSteps(dc, _tileCentreX[1] - Icons.STEPS_W * s / 2, _tileIconTop, s);
+        dc.drawText(_tileCentreX[1], _tileValueTop, _num12Font, _stepsText, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(Palette.TRACK, Graphics.COLOR_TRANSPARENT);
+        dc.fillRectangle(_stepsBarX, _stepsBarY, _stepsBarW, _stepsBarH);
+        var fill = (_stepsBarW * _stepsFill + 0.5).toNumber();
+        if (fill > 0) {
+            dc.setColor(Palette.ACCENT, Graphics.COLOR_TRANSPARENT);
+            dc.fillRectangle(_stepsBarX, _stepsBarY, fill, _stepsBarH);
+        }
+
+        // Distance, with a small grey unit
+        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        Icons.drawPin(dc, _tileCentreX[2] - Icons.PIN_W * s / 2, _tileIconTop, s);
+        dc.drawText(_distanceTextX, _tileValueTop, _num12Font, _distanceText, Graphics.TEXT_JUSTIFY_LEFT);
+        if (_distanceUnit.length() > 0) {
+            dc.setColor(Palette.LABEL, Graphics.COLOR_TRANSPARENT);
+            dc.drawText(_distanceUnitX, _tileUnitTop, _labelFont, _distanceUnit, Graphics.TEXT_JUSTIFY_LEFT);
+        }
+    }
 
     private function drawHeartBox(dc as Dc) as Void {
         dc.setColor(Palette.ACCENT, Graphics.COLOR_TRANSPARENT);
@@ -606,6 +687,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _sunTimesDirty = true;
         _heartDirty = true;
         _graphSlot = -1;
+        _caloriesKey = -2;
+        _stepsKey = -2;
+        _distanceKey = -2;
     }
 
     //! Splits HH:MM into digits and places each glyph with the time's tracking.
@@ -716,6 +800,66 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _bodyBatteryText = (value == null) ? "--" : value.toString();
         _boltX = rowLeft(dc, BOX_BODY_BATTERY, Icons.BOLT_W, BOLT_GAP, _bodyBatteryText, _num13Font);
         _bodyBatteryTextX = round(_boltX + (Icons.BOLT_W + BOLT_GAP) * _sx);
+    }
+
+    //! Calories, steps and distance for today (§7). Text is rebuilt only when a value changes.
+    private function refreshActivity(dc as Dc) as Void {
+        var info = ActivityMonitor.getInfo();
+
+        var calories = info.calories;
+        var key = (calories == null) ? -1 : calories;
+        if (key != _caloriesKey) {
+            _caloriesKey = key;
+            _caloriesText = (calories == null) ? "--" : formatThousands(calories);
+        }
+
+        var steps = info.steps;
+        var goal = info.stepGoal;
+        _stepsFill = 0.0;
+        if (steps != null && goal != null && goal > 0) {
+            _stepsFill = Icons.clamp01(steps.toFloat() / goal);
+        }
+        key = (steps == null) ? -1 : steps;
+        if (key != _stepsKey) {
+            _stepsKey = key;
+            _stepsText = (steps == null) ? "--" : formatThousands(steps);
+        }
+
+        // Distance in tenths of the device's unit; the key also records the unit.
+        var statute = System.getDeviceSettings().distanceUnits == System.UNIT_STATUTE;
+        var cm = info.distance;
+        var tenths = -1;
+        if (cm != null) {
+            tenths = (cm / (statute ? CM_PER_MILE : CM_PER_KM) * 10 + 0.5).toNumber();
+        }
+        key = (tenths < 0) ? -1 : tenths * 2 + (statute ? 1 : 0);
+        if (key != _distanceKey) {
+            _distanceKey = key;
+            if (tenths < 0) {
+                _distanceText = "--";
+                _distanceUnit = "";
+            } else {
+                _distanceText = (tenths / 10).toString() + "." + (tenths % 10).toString();
+                _distanceUnit = statute ? "MI" : "KM";
+            }
+            // Value and unit centred together on the column.
+            var valueW = dc.getTextWidthInPixels(_distanceText, _num12Font);
+            var unitW = 0.0;
+            if (_distanceUnit.length() > 0) {
+                unitW = DISTANCE_UNIT_GAP * _sx + dc.getTextWidthInPixels(_distanceUnit, _labelFont);
+            }
+            var left = _tileCentreX[2] - (valueW + unitW) / 2;
+            _distanceTextX = round(left);
+            _distanceUnitX = round(left + valueW + DISTANCE_UNIT_GAP * _sx);
+        }
+    }
+
+    //! 1847 -> "1,847"; 12345 -> "12,345".
+    private function formatThousands(n as Number) as String {
+        if (n < 1000) {
+            return n.toString();
+        }
+        return formatThousands(n / 1000) + "," + (n % 1000).format("%03d");
     }
 
     //! Re-reads heart-rate history, resting heart rate and the Body Battery

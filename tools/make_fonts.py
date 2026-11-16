@@ -35,10 +35,11 @@ FONTS = [
     # Small numbers with hard edges (system fonts were too light on the MIP
     # screen). Hinting only lands on some digit heights, so the sizes are the
     # nearest to the mockup:
-    #   num12: 17 px -> 12 px digits. Seconds (spec 16 px) and moon percent.
+    #   num12: 17 px -> 12 px digits. Seconds (spec 16 px), moon percent and
+    #          tile values (with "," and ".").
     #   num13: 18 px -> 13 px digits. Body Battery and battery days.
     #   num11: 14 px -> 11 px digits. Solar percent (mockup 10 px; 10 is not reachable).
-    ("num12", "BarlowCondensed-Bold.ttf", 17, "0123456789%d-", "threshold", None),
+    ("num12", "BarlowCondensed-Bold.ttf", 17, "0123456789%d-,.", "threshold", None),
     ("num13", "BarlowCondensed-Bold.ttf", 18, "0123456789%d-", "threshold", None),
     ("num11", "BarlowCondensed-Bold.ttf", 14, "0123456789%d-", "threshold", None),
     # Current heart rate: spec 20 px bold. 14 px digits are not reachable with
