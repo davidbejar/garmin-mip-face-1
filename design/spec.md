@@ -80,8 +80,8 @@ Use only the 64 MIP colours: each of red, green and blue is 00, 55, AA or FF.
 | Role | Value |
 |------|-------|
 | Background | #FFFFFF |
-| Text colour (setting) | default #000000; options #000000, #000055, #005500, #550000, #0055AA |
-| Accent (setting) | default #FF5500; options #FF5500, #AA0000, #0055AA, #00AA55 |
+| Text colour (setting) | default #000000; options #000000 (black), #000055 (navy), #550055 (dark purple) |
+| Accent (setting) | default #FF5500; options #FF5500 (orange), #AA00AA (magenta), #FFAA00 (amber) |
 | Small labels | #555555 |
 | Bar track (unfilled part) | #AAAAAA |
 | Date block text | #FFFFFF |
@@ -154,7 +154,13 @@ Moon labels: NEW, WAX CRES, 1ST QTR, WAX GIB, FULL, WAN GIB, LAST QTR, WAN CRES.
 
 ## 9. Settings
 
-- Text colour and accent colour (options in section 5).
+- Text colour and accent colour (options in section 5). Changed 2026-11-16: the option lists avoid the colour-rule
+  colours (red, green, blue) so warnings and targets always stand out. The earlier lists included dark green, dark
+  red, blue, red and green, which made some rules invisible.
+- Heart-rate label (added 2026-11-16): "REST nn" (7-day average resting heart rate, default) or "MAX nn" (highest
+  reading in the graph's 4-hour window, i.e. the tallest bar). "MAX --" when the graph has no data.
+- Available on the watch (system Watch Face menu, via `getSettingsView`), in the simulator's settings editor, and in
+  Garmin Connect for store installs.
 - Prefer on-device settings so they can be tested by sideloading. Supporting the fēnix 8 native watch face editor is a later step.
 
 ## 10. Permissions (check each)

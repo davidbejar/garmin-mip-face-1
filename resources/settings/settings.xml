@@ -1,0 +1,24 @@
+<!-- Settings shown in the simulator's settings editor and, for store installs,
+     in Garmin Connect. The same choices are on the watch via getSettingsView(). -->
+<settings>
+    <setting propertyKey="@Properties.TextColour" title="@Strings.TextColourTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.TextBlack</listEntry>
+            <listEntry value="1">@Strings.TextNavy</listEntry>
+            <listEntry value="2">@Strings.TextPurple</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.AccentColour" title="@Strings.AccentTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.AccentOrange</listEntry>
+            <listEntry value="1">@Strings.AccentMagenta</listEntry>
+            <listEntry value="2">@Strings.AccentAmber</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.HeartRateLabel" title="@Strings.HeartRateLabelTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.HeartRateRest</listEntry>
+            <listEntry value="1">@Strings.HeartRateMax</listEntry>
+        </settingConfig>
+    </setting>
+</settings>

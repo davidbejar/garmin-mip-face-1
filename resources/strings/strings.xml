@@ -1,3 +1,17 @@
 <strings>
     <string id="AppName">Instrument Panel</string>
+
+    <!-- Settings -->
+    <string id="SettingsTitle">Instrument Panel</string>
+    <string id="TextColourTitle">Text colour</string>
+    <string id="TextBlack">Black</string>
+    <string id="TextNavy">Navy</string>
+    <string id="TextPurple">Dark purple</string>
+    <string id="AccentTitle">Accent</string>
+    <string id="AccentOrange">Orange</string>
+    <string id="AccentMagenta">Magenta</string>
+    <string id="AccentAmber">Amber</string>
+    <string id="HeartRateLabelTitle">Heart-rate label</string>
+    <string id="HeartRateRest">Resting (REST)</string>
+    <string id="HeartRateMax">4-hour max (MAX)</string>
 </strings>

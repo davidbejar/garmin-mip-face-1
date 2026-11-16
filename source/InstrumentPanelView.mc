@@ -275,7 +275,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _graphBarW as Number = 3;
     private var _heartDirty as Boolean = true;
     private var _heartText as String = "--";
-    private var _restText as String = "REST --";
+    private var _hrLabelText as String = "REST --";
     private var _heartX as Float = 0.0;
     private var _heartTextX as Number = 0;
     private var _hrLabelX as Number = 0;
@@ -303,14 +303,20 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _distanceTextX as Number = 0;
     private var _distanceUnitX as Number = 0;
 
+    // Text and accent colours and the heart-rate label, from the settings (§9).
+    // Read in initialize() and again whenever a setting changes.
+    private var _ink as Number = 0x000000;
+    private var _accent as Number = 0xFF5500;
+    private var _heartRateLabel as Number = Settings.LABEL_REST;
+
     // Colours resolved by the colour rules (§6) whenever a value changes.
-    private var _batteryIconColour as Number = Palette.TEXT;   // icon and charge bar
-    private var _batteryTextColour as Number = Palette.TEXT;
-    private var _solarIconColour as Number = Palette.ACCENT;
-    private var _solarTextColour as Number = Palette.TEXT;
-    private var _bodyBatteryIconColour as Number = Palette.TEXT;
-    private var _bodyBatteryTextColour as Number = Palette.TEXT;
-    private var _stepsBarColour as Number = Palette.ACCENT;
+    private var _batteryIconColour as Number = 0;   // icon and charge bar
+    private var _batteryTextColour as Number = 0;
+    private var _solarIconColour as Number = 0;
+    private var _solarTextColour as Number = 0;
+    private var _bodyBatteryIconColour as Number = 0;
+    private var _bodyBatteryTextColour as Number = 0;
+    private var _stepsBarColour as Number = 0;
     private var _graphBarColour as Array<Number> = new Array<Number>[HeartRateGraph.BARS];
 
     // Body Battery from SensorHistory, used when the complication has no value.
@@ -329,7 +335,21 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     function initialize() {
         WatchFace.initialize();
+        loadSettings();
         subscribeComplications();
+    }
+
+    //! Called by the app when a setting changes (Garmin Connect, simulator
+    //! editor or the on-watch menu): re-read it and rebuild every cached colour.
+    function reloadSettings() as Void {
+        loadSettings();
+        invalidateCaches();
+    }
+
+    private function loadSettings() as Void {
+        _ink = Settings.textColour();
+        _accent = Settings.accentColour();
+        _heartRateLabel = Settings.heartRateLabel();
     }
 
     function onLayout(dc as Dc) as Void {
@@ -441,7 +461,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         for (var i = 0; i < bars; i++) {
             _graphBarX[i] = scaleX(GRAPH_RIGHT - GRAPH_BAR_W - (bars - 1 - i) * GRAPH_BAR_PITCH);
             _graphBarTop[i] = _graphBottom;
-            _graphBarColour[i] = Palette.TEXT;
+            _graphBarColour[i] = _ink;
         }
 
         _boltPoints = new Array<Array<Float>>[Icons.BOLT_POINTS.size()];
@@ -557,9 +577,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         var s = _sx;
 
         // Calories
-        dc.setColor(Palette.ACCENT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_accent, Graphics.COLOR_TRANSPARENT);
         Icons.drawFlame(dc, _tileCentreX[0] - Icons.FLAME_W * s / 2, _tileIconTop, s);
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         dc.drawText(_tileCentreX[0], _tileValueTop, _num12Font, _caloriesText, Graphics.TEXT_JUSTIFY_CENTER);
 
         // Steps, with progress toward the goal
@@ -574,7 +594,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         }
 
         // Distance, with a small grey unit
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         Icons.drawPin(dc, _tileCentreX[2] - Icons.PIN_W * s / 2, _tileIconTop, s);
         dc.drawText(_distanceTextX, _tileValueTop, _num12Font, _distanceText, Graphics.TEXT_JUSTIFY_LEFT);
         if (_distanceUnit.length() > 0) {
@@ -584,9 +604,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     }
 
     private function drawHeartBox(dc as Dc) as Void {
-        dc.setColor(Palette.ACCENT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_accent, Graphics.COLOR_TRANSPARENT);
         Icons.drawHeart(dc, _heartX, _heartTop, _sx);
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         dc.drawText(_heartTextX, _hrValueTop, _num15Font, _heartText, Graphics.TEXT_JUSTIFY_LEFT);
 
         // Bars: bottom-aligned; a bar with no data has its top on the bottom line.
@@ -599,19 +619,19 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         }
 
         dc.setColor(Palette.LABEL, Graphics.COLOR_TRANSPARENT);
-        dc.drawText(_hrLabelX, _hrLabelTop, _labelFont, _restText, Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(_hrLabelX, _hrLabelTop, _labelFont, _hrLabelText, Graphics.TEXT_JUSTIFY_LEFT);
     }
 
     private function drawSunTimes(dc as Dc) as Void {
-        Icons.drawSunEvent(dc, _sunriseIconX, _sunIconTop, _sx, true, Palette.TEXT, Palette.ACCENT);
-        Icons.drawSunEvent(dc, _sunsetIconX, _sunIconTop, _sx, false, Palette.TEXT, Palette.ACCENT);
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        Icons.drawSunEvent(dc, _sunriseIconX, _sunIconTop, _sx, true, _ink, _accent);
+        Icons.drawSunEvent(dc, _sunsetIconX, _sunIconTop, _sx, false, _ink, _accent);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         dc.drawText(_sunriseTextX, _sunTimeTop, _sunTimeFont, _sunriseText, Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(_sunsetTextX, _sunTimeTop, _sunTimeFont, _sunsetText, Graphics.TEXT_JUSTIFY_LEFT);
     }
 
     private function drawTime(dc as Dc, sec as Number) as Void {
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         for (var i = 0; i < 4; i++) {
             dc.drawText(_timeDigitX[i], _timeTop, _timeFont, _timeDigits[i], Graphics.TEXT_JUSTIFY_LEFT);
         }
@@ -626,14 +646,14 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     }
 
     private function drawSeconds(dc as Dc, sec as Number) as Void {
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         var tens = sec / 10;
         dc.drawText(_sideX, _secondsTop, _num12Font, tens, Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(_sideX + _secondsAdvance[tens], _secondsTop, _num12Font, sec % 10, Graphics.TEXT_JUSTIFY_LEFT);
     }
 
     private function drawDateBlock(dc as Dc) as Void {
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         dc.fillRoundedRectangle(_dateX, _dateY, _dateW, _dateH, _dateRadius);
 
         dc.setColor(Palette.DATE_TEXT, Graphics.COLOR_TRANSPARENT);
@@ -645,7 +665,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     //! 2 px outlines, drawn as nested 1 px rounded rectangles inside the spec box.
     private function drawBoxOutlines(dc as Dc) as Void {
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         for (var i = 0; i < _boxes.size(); i++) {
             var b = _boxes[i];
             for (var k = 0; k < _outlineWidth; k++) {
@@ -655,7 +675,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     }
 
     private function drawMoonBox(dc as Dc) as Void {
-        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         Icons.drawMoon(dc, _moonIconX, _moonIconTop, _sx, _moonPhase);
         dc.drawText(_moonTextX, _boxValueTop, _num12Font, _moonText, Graphics.TEXT_JUSTIFY_LEFT);
         dc.setColor(Palette.LABEL, Graphics.COLOR_TRANSPARENT);
@@ -808,8 +828,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         }
         // Rule: fewer than 4 days left (only when the device gives days).
         var low = key < ColourRules.BATTERY_LOW_DAYS;
-        _batteryIconColour = low ? Palette.RED : Palette.TEXT;
-        _batteryTextColour = low ? Palette.RED_TEXT : Palette.TEXT;
+        _batteryIconColour = low ? Palette.RED : _ink;
+        _batteryTextColour = low ? Palette.RED_TEXT : _ink;
 
         // Key: -1 when there is no solar sensor; negative intensity (not charging) shows 0%.
         var solarKey = -1;
@@ -824,8 +844,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         }
         // Rule: intensity above 75.
         var strong = solarKey > ColourRules.SOLAR_HIGH;
-        _solarIconColour = strong ? Palette.GREEN : Palette.ACCENT;
-        _solarTextColour = strong ? Palette.GREEN_TEXT : Palette.TEXT;
+        _solarIconColour = strong ? Palette.GREEN : _accent;
+        _solarTextColour = strong ? Palette.GREEN_TEXT : _ink;
     }
 
     private function refreshBodyBattery(dc as Dc) as Void {
@@ -833,8 +853,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         var value = (_bodyBattery != null) ? _bodyBattery : _bodyBatteryHistory;
         _bodyBatteryText = (value == null) ? "--" : value.toString();
         // Rules: above 70 green, below 15 red.
-        _bodyBatteryIconColour = Palette.TEXT;
-        _bodyBatteryTextColour = Palette.TEXT;
+        _bodyBatteryIconColour = _ink;
+        _bodyBatteryTextColour = _ink;
         if (value != null && value > ColourRules.BODY_BATTERY_HIGH) {
             _bodyBatteryIconColour = Palette.GREEN;
             _bodyBatteryTextColour = Palette.GREEN_TEXT;
@@ -860,7 +880,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         }
 
         _stepsFill = 0.0;
-        _stepsBarColour = Palette.ACCENT;
+        _stepsBarColour = _accent;
         if (steps != null && goal != null && goal > 0) {
             _stepsFill = Icons.clamp01(steps.toFloat() / goal);
             if (steps >= goal) {
@@ -942,10 +962,10 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             }
             _graphBarTop[i] = scaleY(bottom - h);
         }
-        ColourRules.graphBarColours(_graph.bpm, _graphBarColour, Palette.TEXT, Palette.ACCENT);
+        ColourRules.graphBarColours(_graph.bpm, _graphBarColour, _ink, _accent);
     }
 
-    //! Current bpm (complication, else a history sample under 10 minutes old) and the REST label.
+    //! Current bpm (complication, else a history sample under 10 minutes old) and the REST/MAX label.
     private function refreshHeart() as Void {
         _heartDirty = false;
         var hr = _heartRate;
@@ -954,8 +974,19 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             hr = _graph.latest;
         }
         _heartText = (hr == null) ? "--" : hr.toString();
-        var rest = _restingHeartRate;
-        _restText = (rest == null) ? "REST --" : "REST " + rest.toString();
+        // Label: resting heart rate, or the 4-hour max (tallest bar) per the setting.
+        if (_heartRateLabel == Settings.LABEL_MAX) {
+            var max = 0;
+            for (var i = 0; i < HeartRateGraph.BARS; i++) {
+                if (_graph.bpm[i] > max) {
+                    max = _graph.bpm[i];
+                }
+            }
+            _hrLabelText = (max > 0) ? "MAX " + max.toString() : "MAX --";
+        } else {
+            var rest = _restingHeartRate;
+            _hrLabelText = (rest == null) ? "REST --" : "REST " + rest.toString();
+        }
     }
 
     //! 7-day average resting heart rate, else the configured one (§7).

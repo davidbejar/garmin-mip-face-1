@@ -15,7 +15,7 @@ It is designed for the 260 × 260 px always-on MIP (memory-in-pixel) screen and 
 - **Moon phase**: icon, percent lit, and phase name
 - **Body Battery**
 - **Watch battery** in days remaining, with a charge bar, plus **solar intensity**
-- **Heart rate**: current and resting values, with a 24-bar graph of the last 4 hours
+- **Heart rate**: current value, resting or 4-hour max (setting), and a 24-bar graph of the last 4 hours
 - **Calories**, **steps** (with a progress bar toward the step goal), and **distance** (km or mi)
 
 Every field shows a fallback (`--`, `--:--`) when its data is missing.
@@ -39,8 +39,13 @@ Fields change colour to flag something worth noticing:
 
 ### Settings
 
-- **Text colour**: black (default), navy, dark green, dark red, or blue
-- **Accent colour**: orange (default), red, blue, or green
+On the watch (this face's settings in the system Watch Face menu), or in Garmin Connect:
+
+- **Text colour**: black (default), navy, or dark purple
+- **Accent colour**: orange (default), magenta, or amber
+- **Heart-rate label**: resting heart rate (`REST 52`, default) or the 4-hour max (`MAX 127`)
+
+The colour options avoid the red, green and blue used by the colour rules, so warnings always stand out.
 
 ### Low power
 

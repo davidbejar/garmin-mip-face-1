@@ -1,0 +1,6 @@
+<!-- Stored settings. Values are indexes into the option lists in source/Settings.mc. -->
+<properties>
+    <property id="TextColour" type="number">0</property>
+    <property id="AccentColour" type="number">0</property>
+    <property id="HeartRateLabel" type="number">0</property>
+</properties>

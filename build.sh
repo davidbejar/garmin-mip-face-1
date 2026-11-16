@@ -17,5 +17,8 @@ mkdir -p bin
 "$SDK_BIN/monkeyc" -f monkey.jungle -d "$DEVICE" -o bin/WatchFace.prg -y "$GARMIN_DEV_KEY" -w
 
 if [[ "${1:-}" == "run" ]]; then
-    "$SDK_BIN/monkeydo" bin/WatchFace.prg "$DEVICE"
+    # Also push the settings definition so the simulator's settings editor
+    # (File > Edit Persistent Storage) can find it.
+    "$SDK_BIN/monkeydo" bin/WatchFace.prg "$DEVICE" \
+        -a "bin/WatchFace-settings.json:GARMIN/Settings/WATCHFACE-settings.json"
 fi
