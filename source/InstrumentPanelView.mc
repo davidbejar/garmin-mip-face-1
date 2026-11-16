@@ -556,6 +556,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     //! Complication callback: store the new value; its text is rebuilt on the next update.
     function onComplicationChanged(id as Complications.Id) as Void {
+        if (demoActive()) {
+            return;   // debug demo: keep the mockup values on screen
+        }
         if (id.equals(_bodyBatteryId)) {
             _bodyBattery = readComplication(_bodyBatteryId);
             _bodyBatteryDirty = true;
@@ -1168,6 +1171,16 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     (:release)
     private function applyDemo(dc as Dc) as Void {
+    }
+
+    (:debug)
+    private function demoActive() as Boolean {
+        return Demo.STATE != 0;
+    }
+
+    (:release)
+    private function demoActive() as Boolean {
+        return false;
     }
 
     (:debug)

@@ -64,6 +64,25 @@ FONTS = [
 
 PAD = 1  # transparent gap between glyphs in the atlas
 
+# Hand-drawn glyphs, used instead of the rendered ones. At 7 px capitals the
+# hinted renderer produced broken digits (a 5 that read as 6, a split 4, stray
+# pixels in 3 and 7), so the label font's digits are drawn by hand: 2 px
+# strokes, 7 px tall, sitting on the baseline. "#" = ink.
+HAND_DRAWN = {
+    "label": {
+        "0": [".###.", "##.##", "##.##", "##.##", "##.##", "##.##", ".###."],
+        "1": [".##", "###", ".##", ".##", ".##", ".##", ".##"],
+        "2": [".###.", "##.##", "...##", "..##.", ".##..", "##...", "#####"],
+        "3": ["####.", "...##", "...##", ".###.", "...##", "...##", "####."],
+        "4": ["...##", "..###", ".#.##", "#..##", "#####", "...##", "...##"],
+        "5": ["#####", "##...", "####.", "...##", "...##", "##.##", ".###."],
+        "6": [".###.", "##...", "##...", "####.", "##.##", "##.##", ".###."],
+        "7": ["#####", "...##", "..##.", "..##.", ".##..", ".##..", ".##.."],
+        "8": [".###.", "##.##", "##.##", ".###.", "##.##", "##.##", ".###."],
+        "9": [".###.", "##.##", "##.##", ".####", "...##", "...##", ".###."],
+    },
+}
+
 
 def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False):
     font = ImageFont.truetype(os.path.join(SRC, ttf), size)
@@ -88,6 +107,15 @@ def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False):
             continue
         ix0, iy0, ix1, iy1 = canvas.getbbox()
         mask = canvas.crop((ix0, iy0, ix1, iy1))
+        hand = HAND_DRAWN.get(name, {}).get(ch)
+        if hand is not None:
+            # Replace the rendered glyph; keep it on the baseline.
+            mask = Image.new("L", (len(hand[0]), len(hand)), 0)
+            for y, row in enumerate(hand):
+                for x, c in enumerate(row):
+                    if c == "#":
+                        mask.putpixel((x, y), 255)
+            iy0 = m + ascent - len(hand)
         if gap is not None:
             cells.append((ch, mask, 0, iy0 - m, mask.width + gap))
         else:
