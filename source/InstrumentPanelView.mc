@@ -28,8 +28,10 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     // Week number and seconds, 3 px right of the time.
     private const SIDE_GAP = 3.0;
-    private const WEEK_BASELINE = 104.0;   // cap tops at y 96, level with the time digits
-    private const WEEK_CAP_HEIGHT = 8.0;
+    // Week number in the hard-edged label font (7 px capitals, owner's choice):
+    // the mockup's 11 px text is 30-31 px wide, which runs into the side panel
+    // at wide times such as 04:44; this is 27-28 px and always clears it.
+    private const WEEK_BASELINE = 103.0;   // cap tops at y 96, level with the time digits
     private const SECONDS_BASELINE = 141.0;
     private const SECONDS_DIGIT_H = 12.0;   // num12 font
 
@@ -137,10 +139,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     // Cap height as a fraction of getVectorFont's :size. The size is the font's
     // full line height (hhea ascent + descent), not the em: confirmed in the
-    // simulator. Values from the TTF metrics:
-    //   Bionic SemiBold: cap 643 / (930 + 346) = 0.504
-    //   Roboto Condensed Bold: cap 1456 / (1900 + 500) = 0.607
-    private const BIONIC_CAP_RATIO = 0.504;
+    // simulator. From the TTF metrics, Roboto Condensed Bold: cap 1456 / (1900 + 500).
     private const ROBOTO_CONDENSED_CAP_RATIO = 0.607;
 
     // ---- Fonts, loaded once in onLayout() ----
@@ -346,7 +345,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _sunTimeFont = WatchUi.loadResource(Rez.Fonts.SunTimeFont) as FontResource;
         _monthFont = WatchUi.loadResource(Rez.Fonts.MonthFont) as FontResource;
         _labelFont = WatchUi.loadResource(Rez.Fonts.LabelFont) as FontResource;
-        _weekFont = vectorFont("BionicSemiBold", WEEK_CAP_HEIGHT / BIONIC_CAP_RATIO, Graphics.FONT_XTINY);
+        _weekFont = _labelFont;
         _cap13Font = vectorFont("RobotoCondensedBold", CAP_13 / ROBOTO_CONDENSED_CAP_RATIO, Graphics.FONT_SMALL);
 
         // Time

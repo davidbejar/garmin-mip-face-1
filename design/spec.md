@@ -59,6 +59,9 @@ bitmap fonts (digits and the few letters needed only, to save memory).
 | Date line 2 (month) | 9 | Bold, letter-spaced |
 | Box labels, "REST 52", "KM" | 8.5 | Bold |
 
+Week number (changed 2026-11-16): drawn in the same hard-edged 7 px label font as the month and box labels, in the text
+colour. At 11 px it is 30-31 px wide and runs into the side panel at wide times such as 04:44.
+
 The 8.5 px labels are at the limit of legibility on this screen. Check them in the simulator and on the watch.
 If they are hard to read, use the smallest system font, or drop the labels and rely on the icons.
 
