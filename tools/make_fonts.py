@@ -23,43 +23,62 @@ MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY",
 #   "threshold" pixels at least half covered are inked; crisp small digits.
 #   "mono"      FreeType's hinted 1-bit render; cleanest stems at tiny sizes.
 #
-# name, source TTF, pixel size, glyphs, edge mode, tight
-#   tight: drop side bearings (xoffset 0, xadvance = ink width) so the code
-#   sets the exact gap between letters.
+# name, source TTF, pixel size, glyphs, edge mode, gap[, space]
+#   gap None: the font's own spacing (side bearings kept).
+#   gap n:    drop side bearings and space every glyph exactly n px from the
+#             next (xadvance = ink width + n); `space` is the word gap in px.
 FONTS = [
     # 64 px as in the spec.
-    ("time", "BarlowCondensed-SemiBold.ttf", 64, "0123456789:", "aa", False),
-    # Spec says 16 px; 17 gives the mockup's 12 px digit height.
-    ("seconds", "BarlowCondensed-Bold.ttf", 17, "0123456789", "threshold", False),
+    ("time", "BarlowCondensed-SemiBold.ttf", 64, "0123456789:", "aa", None),
+    # Small numbers with hard edges (system fonts were too light on the MIP
+    # screen). Hinting only lands on some digit heights, so the sizes are the
+    # nearest to the mockup:
+    #   num12: 17 px -> 12 px digits. Seconds (spec 16 px) and moon percent.
+    #   num13: 18 px -> 13 px digits. Body Battery and battery days.
+    #   num11: 14 px -> 11 px digits. Solar percent (mockup 10 px; 10 is not reachable).
+    ("num12", "BarlowCondensed-Bold.ttf", 17, "0123456789%d-", "threshold", None),
+    ("num13", "BarlowCondensed-Bold.ttf", 18, "0123456789%d-", "threshold", None),
+    ("num11", "BarlowCondensed-Bold.ttf", 14, "0123456789%d-", "threshold", None),
     # Month line in the date block. 9 px -> 7 px capitals after hinting; the
     # system font's anti-aliased 6 px capitals were too soft on the MIP screen.
-    ("month", "Barlow-Bold.ttf", 9, "".join(sorted(set("".join(MONTHS)))), "mono", True),
+    # Gap 0: the code adds the month's letter-spacing.
+    ("month", "Barlow-Bold.ttf", 9, "".join(sorted(set("".join(MONTHS)))), "mono", 0),
+    # Small grey box labels ("WAX CRES", "BODY BAT", later "REST 52"). The spec
+    # says 8.5 px (6 px capitals), but hinting only lands on 5 or 7 px capitals
+    # and unhinted 6 px renders were uneven, so this uses the month's 7 px
+    # capitals. The font's own spacing crowded "1ST QTR", so every letter is
+    # 1 px apart with 2 px between words (widest label, WAX CRES: 46 px).
+    ("label", "Barlow-Bold.ttf", 9, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 -", "mono", 1, 2),
 ]
 
 PAD = 1  # transparent gap between glyphs in the atlas
 
 
-def build(name, ttf, size, glyphs, mode, tight):
+def build(name, ttf, size, glyphs, mode, gap, space=None):
     font = ImageFont.truetype(os.path.join(SRC, ttf), size)
     ascent, descent = font.getmetrics()
 
     # Rasterise each glyph on a generous canvas with its baseline origin at
     # (m, m + ascent), then crop to the inked pixels so the side bearings
     # cost no atlas memory (they live in xoffset / xadvance instead).
-    m = size  # margin
+    m = int(size) + 1  # margin
     cells = []
     for ch in glyphs:
-        canvas = Image.new("L", (3 * size, ascent + descent + 2 * m), 0)
+        canvas = Image.new("L", (3 * m, ascent + descent + 2 * m), 0)
         draw = ImageDraw.Draw(canvas)
         if mode == "mono":
             draw.fontmode = "1"
         draw.text((m, m + ascent), ch, font=font, fill=255, anchor="ls")
         if mode == "threshold":
             canvas = canvas.point(lambda v: 255 if v >= 128 else 0)
+        if canvas.getbbox() is None:  # blank glyph (space): advance only
+            adv = round(font.getlength(ch)) if gap is None or space is None else space + gap
+            cells.append((ch, Image.new("L", (1, 1), 0), 0, 0, adv))
+            continue
         ix0, iy0, ix1, iy1 = canvas.getbbox()
         mask = canvas.crop((ix0, iy0, ix1, iy1))
-        if tight:
-            cells.append((ch, mask, 0, iy0 - m, mask.width))
+        if gap is not None:
+            cells.append((ch, mask, 0, iy0 - m, mask.width + gap))
         else:
             cells.append((ch, mask, ix0 - m, iy0 - m, round(font.getlength(ch))))
 
@@ -111,6 +130,10 @@ if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     for spec in FONTS:
         advances = build(*spec)
+        if spec[0] == "label":
+            font = ImageFont.truetype(os.path.join(SRC, spec[1]), spec[2])
+            for text in ("WAX CRES", "WAN CRES", "BODY BAT", "LAST QTR", "1ST QTR"):
+                print(f"   {text:9s} {sum(advances[c] for c in text) - spec[5]}px")
         if spec[0] == "month":
             for month in MONTHS:
                 ink = sum(advances[c] for c in month)

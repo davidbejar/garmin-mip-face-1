@@ -5,5 +5,8 @@ import Toybox.Lang;
 module Palette {
     const BACKGROUND = 0xFFFFFF;
     const TEXT = 0x000000;
+    const ACCENT = 0xFF5500;
+    const LABEL = 0x555555;
+    const TRACK = 0xAAAAAA;
     const DATE_TEXT = 0xFFFFFF;
 }
