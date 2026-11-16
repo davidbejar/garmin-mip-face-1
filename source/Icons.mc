@@ -4,7 +4,7 @@ import Toybox.Math;
 
 //! Icons drawn in code so their colour is set at draw time (design/spec.md §4).
 //! Sizes are on the 260 px spec canvas, measured from the mockup; `s` scales them.
-//! The caller sets the colour. None of these allocate.
+//! The caller sets the colour (two-colour icons take it as arguments). None of these allocate.
 module Icons {
 
     const MOON_SIZE = 12.0;
@@ -15,10 +15,11 @@ module Icons {
     const SUN_W = 12.0;
     const SUN_H = 13.0;
 
-    //! Sun traced from the mockup, as horizontal runs (row, x, width; flat array
-    //! to save memory) on a 12 x 13
-    //! grid: a 6 px disc and eight 2 px rays, with a 1 px gap between the side
-    //! rays and the disc so they stay separate on the MIP screen.
+    // Pixel icons traced from the mockup are stored as horizontal runs
+    // (row, x, width), flattened into one array to save memory; see drawRuns().
+
+    //! Sun on a 12 x 13 grid: a 6 px disc and eight 2 px rays, with a 1 px gap
+    //! between the side rays and the disc so they stay separate on the MIP screen.
     const SUN_RUNS = [
         0, 5, 2,
         1, 5, 2,
@@ -34,6 +35,15 @@ module Icons {
         11, 5, 2,
         12, 5, 2
     ] as Array<Number>;
+
+    //! Sunrise and sunset, 12 x 11 (not in the mockup; chosen for legibility on
+    //! the MIP screen): a triangle (up = sunrise, down = sunset) in the text
+    //! colour, a gap, then a solid half-sun in the accent colour on a horizon line.
+    const SUN_EVENT_W = 12.0;
+    const SUNRISE_ARROW_RUNS = [0, 5, 2,  1, 4, 4,  2, 3, 6,  3, 2, 8] as Array<Number>;
+    const SUNSET_ARROW_RUNS = [0, 2, 8,  1, 3, 6,  2, 4, 4,  3, 5, 2] as Array<Number>;
+    const HALF_SUN_RUNS = [5, 4, 4,  6, 2, 8,  7, 2, 8,  8, 1, 10,  9, 1, 10] as Array<Number>;
+    const HORIZON_RUNS = [10, 0, 12] as Array<Number>;
 
     //! Bolt outline on a 7 x 10 grid (Body Battery).
     const BOLT_POINTS = [[4.5, 0.0], [4.5, 3.0], [7.0, 3.0], [3.0, 10.0], [3.5, 6.0], [0.0, 6.0]] as Array<Array<Float>>;
@@ -97,12 +107,27 @@ module Icons {
         }
     }
 
-    //! Sun (solar): filled disc and eight short rays, from SUN_RUNS.
+    //! Sun (solar): filled disc and eight short rays.
     function drawSun(dc as Dc, left as Float, top as Float, s as Float) as Void {
-        for (var i = 0; i < SUN_RUNS.size(); i += 3) {
-            var row = SUN_RUNS[i];
-            var x = SUN_RUNS[i + 1];
-            var w = SUN_RUNS[i + 2];
+        drawRuns(dc, SUN_RUNS, left, top, s);
+    }
+
+    //! Sunrise (rising = true) or sunset. Two colours, so the caller passes them.
+    function drawSunEvent(dc as Dc, left as Float, top as Float, s as Float, rising as Boolean,
+            ink as Number, accent as Number) as Void {
+        dc.setColor(accent, Graphics.COLOR_TRANSPARENT);
+        drawRuns(dc, HALF_SUN_RUNS, left, top, s);
+        dc.setColor(ink, Graphics.COLOR_TRANSPARENT);
+        drawRuns(dc, rising ? SUNRISE_ARROW_RUNS : SUNSET_ARROW_RUNS, left, top, s);
+        drawRuns(dc, HORIZON_RUNS, left, top, s);
+    }
+
+    //! Draws a run-encoded pixel icon (row, x, width triples), scaled by s.
+    function drawRuns(dc as Dc, runs as Array<Number>, left as Float, top as Float, s as Float) as Void {
+        for (var i = 0; i < runs.size(); i += 3) {
+            var row = runs[i];
+            var x = runs[i + 1];
+            var w = runs[i + 2];
             var x0 = (left + x * s + 0.5).toNumber();
             var x1 = (left + (x + w) * s + 0.5).toNumber();
             var y0 = (top + row * s + 0.5).toNumber();

@@ -39,6 +39,9 @@ FONTS = [
     ("num12", "BarlowCondensed-Bold.ttf", 17, "0123456789%d-", "threshold", None),
     ("num13", "BarlowCondensed-Bold.ttf", 18, "0123456789%d-", "threshold", None),
     ("num11", "BarlowCondensed-Bold.ttf", 14, "0123456789%d-", "threshold", None),
+    # Sunrise and sunset times: same 11 px digits in SemiBold, lighter than the
+    # Bold box numbers (user's choice after comparing weights in the simulator).
+    ("sun11", "BarlowCondensed-SemiBold.ttf", 14, "0123456789-:", "threshold", None),
     # Month line in the date block. 9 px -> 7 px capitals after hinting; the
     # system font's anti-aliased 6 px capitals were too soft on the MIP screen.
     # Gap 0: the code adds the month's letter-spacing.

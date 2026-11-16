@@ -88,8 +88,11 @@ Use only the 64 MIP colours: each of red, green and blue is 00, 55, AA or FF.
 | Green: numbers | #005500 |
 | Lowest heart-rate bar | #0055FF |
 
-Default colouring: all text, outlines, the date block fill, and the battery, bolt, steps, pin, moon and sun-time icons use the
-text colour. The heart, flame and sun icons use the accent. The steps bar fill uses the accent. The battery bar fill uses the text colour.
+Default colouring: all text, outlines, the date block fill, and the battery, bolt, steps, pin and moon icons use the
+text colour. The heart, flame and sun icons use the accent.
+
+Sunrise and sunset icons (changed 2026-11-16, not in the mockups): a solid half-sun in the accent colour on a horizon line,
+with a triangle above it (up for sunrise, down for sunset). Triangle and horizon use the text colour. The steps bar fill uses the accent. The battery bar fill uses the text colour.
 
 ## 6. Colour rules
 

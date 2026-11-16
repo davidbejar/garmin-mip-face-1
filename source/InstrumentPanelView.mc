@@ -76,6 +76,15 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private const SUN_TOP = 126.0;             // 12 x 13 px icon centred on y 132
     private const SOLAR_BASELINE = 138.0;
 
+    // ---- Sun times row (§2 row 1), measured from the mockup ----
+
+    // Sunrise icon + time, 10 px gap, sunset icon + time; centred on the face.
+    private const SUN_ROW_CENTRE_X = 130.0;
+    private const SUN_ICON_TOP = 16.0;    // 11 px tall icon, horizon on y 26
+    private const SUN_TIME_BASELINE = 28.0;
+    private const SUN_ICON_GAP = 3.0;    // icon to its time
+    private const SUN_PAIR_GAP = 10.0;   // sunrise time to sunset icon
+
     // Capital height of date line 1 ("MON 16"), a system vector font.
     private const CAP_13 = 13.0;
 
@@ -94,6 +103,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _num12Font as FontType = Graphics.FONT_TINY;   // seconds, moon percent
     private var _num13Font as FontType = Graphics.FONT_SMALL;  // Body Battery, battery days
     private var _num11Font as FontType = Graphics.FONT_TINY;   // solar percent
+    private var _sunTimeFont as FontType = Graphics.FONT_TINY; // sunrise and sunset (SemiBold)
     private var _weekFont as FontType = Graphics.FONT_XTINY;
     private var _monthFont as FontType = Graphics.FONT_XTINY;
     private var _labelFont as FontType = Graphics.FONT_XTINY;
@@ -180,6 +190,21 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _boltX as Float = 0.0;
     private var _bodyBatteryTextX as Number = 0;
 
+    // Sunrise and sunset: complication values in seconds after local midnight.
+    private var _sunriseId as Complications.Id? = null;
+    private var _sunsetId as Complications.Id? = null;
+    private var _sunrise as Number? = null;
+    private var _sunset as Number? = null;
+    private var _sunTimesDirty as Boolean = true;
+    private var _sunriseText as String = "--:--";
+    private var _sunsetText as String = "--:--";
+    private var _sunriseIconX as Float = 0.0;
+    private var _sunriseTextX as Number = 0;
+    private var _sunsetIconX as Float = 0.0;
+    private var _sunsetTextX as Number = 0;
+    private var _sunIconTop as Float = 0.0;
+    private var _sunTimeTop as Number = 0;
+
     // Watch battery and solar
     private var _batteryCharge as Float = 0.0;
     private var _batteryKey as Number = -1;
@@ -193,7 +218,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     function initialize() {
         WatchFace.initialize();
-        subscribeBodyBattery();
+        subscribeComplications();
     }
 
     function onLayout(dc as Dc) as Void {
@@ -205,6 +230,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _num12Font = WatchUi.loadResource(Rez.Fonts.Num12Font) as FontResource;
         _num13Font = WatchUi.loadResource(Rez.Fonts.Num13Font) as FontResource;
         _num11Font = WatchUi.loadResource(Rez.Fonts.Num11Font) as FontResource;
+        _sunTimeFont = WatchUi.loadResource(Rez.Fonts.SunTimeFont) as FontResource;
         _monthFont = WatchUi.loadResource(Rez.Fonts.MonthFont) as FontResource;
         _labelFont = WatchUi.loadResource(Rez.Fonts.LabelFont) as FontResource;
         _weekFont = vectorFont("BionicSemiBold", WEEK_CAP_HEIGHT / BIONIC_CAP_RATIO, Graphics.FONT_XTINY);
@@ -263,6 +289,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _barH = scaleY(BAR_Y + BAR_H) - _barY;
         _sunTop = SUN_TOP * _sy;
         _solarTop = topForBaseline(SOLAR_BASELINE, _num11Font);
+        _sunIconTop = SUN_ICON_TOP * _sy;
+        _sunTimeTop = topForBaseline(SUN_TIME_BASELINE, _sunTimeFont);
 
         _boltPoints = new Array<Array<Float>>[Icons.BOLT_POINTS.size()];
         for (var i = 0; i < _boltPoints.size(); i++) {
@@ -293,9 +321,13 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         if (_bodyBatteryDirty) {
             refreshBodyBattery(dc);
         }
+        if (_sunTimesDirty) {
+            refreshSunTimes(dc);
+        }
 
         dc.setColor(Palette.BACKGROUND, Palette.BACKGROUND);
         dc.clear();
+        drawSunTimes(dc);
         drawDateBlock(dc);
         drawBoxOutlines(dc);
         drawMoonBox(dc);
@@ -304,14 +336,29 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         drawTime(dc, clock.sec);
     }
 
-    //! Complication callback: re-read Body Battery on the next update.
+    //! Complication callback: store the new value; its text is rebuilt on the next update.
     function onComplicationChanged(id as Complications.Id) as Void {
-        if (_bodyBatteryId != null && id.equals(_bodyBatteryId)) {
-            readBodyBattery();
+        if (id.equals(_bodyBatteryId)) {
+            _bodyBattery = readComplication(_bodyBatteryId);
+            _bodyBatteryDirty = true;
+        } else if (id.equals(_sunriseId)) {
+            _sunrise = readComplication(_sunriseId);
+            _sunTimesDirty = true;
+        } else if (id.equals(_sunsetId)) {
+            _sunset = readComplication(_sunsetId);
+            _sunTimesDirty = true;
         }
     }
 
     // ---- Drawing (no allocation) ----
+
+    private function drawSunTimes(dc as Dc) as Void {
+        Icons.drawSunEvent(dc, _sunriseIconX, _sunIconTop, _sx, true, Palette.TEXT, Palette.ACCENT);
+        Icons.drawSunEvent(dc, _sunsetIconX, _sunIconTop, _sx, false, Palette.TEXT, Palette.ACCENT);
+        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(_sunriseTextX, _sunTimeTop, _sunTimeFont, _sunriseText, Graphics.TEXT_JUSTIFY_LEFT);
+        dc.drawText(_sunsetTextX, _sunTimeTop, _sunTimeFont, _sunsetText, Graphics.TEXT_JUSTIFY_LEFT);
+    }
 
     private function drawTime(dc as Dc, sec as Number) as Void {
         dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
@@ -399,6 +446,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _batteryKey = -1;
         _solarKey = -2;
         _bodyBatteryDirty = true;
+        _sunTimesDirty = true;
     }
 
     //! Splits HH:MM into digits and places each glyph with the time's tracking.
@@ -511,36 +559,80 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _bodyBatteryTextX = round(_boltX + (Icons.BOLT_W + BOLT_GAP) * _sx);
     }
 
-    // ---- Body Battery complication ----
+    //! Places "icon time  icon time" centred on the face (§2 row 1).
+    private function refreshSunTimes(dc as Dc) as Void {
+        _sunTimesDirty = false;
+        _sunriseText = formatTimeOfDay(_sunrise);
+        _sunsetText = formatTimeOfDay(_sunset);
 
-    private function subscribeBodyBattery() as Void {
-        try {
-            _bodyBatteryId = new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY);
-            Complications.registerComplicationChangeCallback(method(:onComplicationChanged));
-            Complications.subscribeToUpdates(_bodyBatteryId as Complications.Id);
-        } catch (e) {
-            _bodyBatteryId = null;
-        }
-        readBodyBattery();
+        var icon = Icons.SUN_EVENT_W * _sx;
+        var gap = SUN_ICON_GAP * _sx;
+        var riseW = dc.getTextWidthInPixels(_sunriseText, _sunTimeFont);
+        var setW = dc.getTextWidthInPixels(_sunsetText, _sunTimeFont);
+        var total = 2 * (icon + gap) + riseW + SUN_PAIR_GAP * _sx + setW;
+
+        var x = SUN_ROW_CENTRE_X * _sx - total / 2;
+        _sunriseIconX = x;
+        x += icon + gap;
+        _sunriseTextX = round(x);
+        x += riseW + SUN_PAIR_GAP * _sx;
+        _sunsetIconX = x;
+        x += icon + gap;
+        _sunsetTextX = round(x);
     }
 
-    private function readBodyBattery() as Void {
-        var value = null;
-        var id = _bodyBatteryId;
-        if (id != null) {
-            try {
-                var v = Complications.getComplication(id).value;
-                if (v instanceof Number) {
-                    value = v;
-                } else if (v instanceof Float) {
-                    value = v.toNumber();
-                }
-            } catch (e) {
-                value = null;
-            }
+    //! Seconds after local midnight as 24-hour HH:MM, or "--:--".
+    private function formatTimeOfDay(seconds as Number?) as String {
+        if (seconds == null) {
+            return "--:--";
         }
-        _bodyBattery = value;
-        _bodyBatteryDirty = true;
+        var hour = (seconds / 3600) % 24;
+        var min = (seconds % 3600) / 60;
+        return hour.format("%02d") + ":" + min.format("%02d");
+    }
+
+    // ---- Complications: Body Battery, sunrise, sunset ----
+
+    private function subscribeComplications() as Void {
+        try {
+            Complications.registerComplicationChangeCallback(method(:onComplicationChanged));
+        } catch (e) {
+            return;
+        }
+        _bodyBatteryId = subscribe(Complications.COMPLICATION_TYPE_BODY_BATTERY);
+        _sunriseId = subscribe(Complications.COMPLICATION_TYPE_SUNRISE);
+        _sunsetId = subscribe(Complications.COMPLICATION_TYPE_SUNSET);
+        _bodyBattery = readComplication(_bodyBatteryId);
+        _sunrise = readComplication(_sunriseId);
+        _sunset = readComplication(_sunsetId);
+    }
+
+    private function subscribe(type as Complications.Type) as Complications.Id? {
+        try {
+            var id = new Complications.Id(type);
+            Complications.subscribeToUpdates(id);
+            return id;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    //! Current value as a whole number, or null when unavailable.
+    private function readComplication(id as Complications.Id?) as Number? {
+        if (id == null) {
+            return null;
+        }
+        try {
+            var v = Complications.getComplication(id).value;
+            if (v instanceof Number) {
+                return v;
+            }
+            if (v instanceof Float) {
+                return v.toNumber();
+            }
+        } catch (e) {
+        }
+        return null;
     }
 
     // ---- Helpers ----
