@@ -112,6 +112,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private const BAR_BPM_SPAN = 80.0;
     // History is re-read when a new 10-minute bar starts (allocates; see HeartRateGraph).
     private const GRAPH_REFRESH_MINUTES = 10;
+    // The newest history sample stands in for the current heart rate only while
+    // it is at most this old (owner's decision); otherwise "--".
+    private const HR_FALLBACK_MAX_AGE = 600;
 
     // ---- Tile row (§2 row 10), measured from the mockup ----
 
@@ -472,9 +475,11 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             return;
         }
         var sec = System.getClockTime().sec;
+        // Clip covers every value 00-59 at any time width (checked against the
+        // font metrics); paint only that rectangle, then the new digits.
         dc.setClip(_sideX, _secondsClipY, _secondsClipW, _secondsClipH);
         dc.setColor(Palette.BACKGROUND, Palette.BACKGROUND);
-        dc.clear();
+        dc.fillRectangle(_sideX, _secondsClipY, _secondsClipW, _secondsClipH);
         drawSeconds(dc, sec);
         dc.clearClip();
     }
@@ -500,6 +505,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             if (slot != _graphSlot) {
                 _graphSlot = slot;
                 refreshHeartHistory(now);
+            }
+            if (_heartRate == null) {
+                _heartDirty = true;   // re-check the fallback's age every minute
             }
             applyDemo(dc);
             logMemory("minute");
@@ -938,10 +946,14 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         ColourRules.graphBarColours(_graph.bpm, _graphBarColour, Palette.TEXT, Palette.ACCENT);
     }
 
-    //! Current bpm (complication, else newest history sample) and the REST label.
+    //! Current bpm (complication, else a history sample under 10 minutes old) and the REST label.
     private function refreshHeart() as Void {
         _heartDirty = false;
-        var hr = (_heartRate != null) ? _heartRate : _graph.latest;
+        var hr = _heartRate;
+        if (hr == null && _graph.latest != null
+                && Time.now().value() - _graph.latestTime <= HR_FALLBACK_MAX_AGE) {
+            hr = _graph.latest;
+        }
         _heartText = (hr == null) ? "--" : hr.toString();
         var rest = _restingHeartRate;
         _restText = (rest == null) ? "REST --" : "REST " + rest.toString();

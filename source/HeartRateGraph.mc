@@ -18,8 +18,10 @@ class HeartRateGraph {
     //! Highest bpm per bar, oldest first; 0 = no data (bar omitted).
     var bpm as Array<Number>;
 
-    //! Newest valid sample, or null. Fallback for the current heart rate.
+    //! Newest valid sample and its time (Unix seconds), or null / 0.
+    //! Fallback for the current heart rate while it is recent.
     var latest as Number? = null;
+    var latestTime as Number = 0;
 
     function initialize() {
         bpm = new Array<Number>[BARS];
@@ -54,6 +56,7 @@ class HeartRateGraph {
                 var v = value.toNumber();
                 if (latest == null) {
                     latest = v;
+                    latestTime = sample.when.value();
                 }
                 var bar = BARS - 1 - (nowSeconds - sample.when.value()) / barSeconds;
                 if (bar >= 0 && bar < BARS && v > bpm[bar]) {
@@ -69,5 +72,6 @@ class HeartRateGraph {
             bpm[i] = 0;
         }
         latest = null;
+        latestTime = 0;
     }
 }
