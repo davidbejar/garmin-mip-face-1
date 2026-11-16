@@ -44,7 +44,7 @@ Fields change colour to flag something worth noticing:
 
 ### Low power
 
-The screen stays on. The face redraws once a minute and hides the seconds.
+The screen stays on. The face redraws once a minute; the seconds keep ticking through partial updates of just their own area (hidden only if the watch reports the power budget is exceeded).
 
 ## Building
 

@@ -36,6 +36,20 @@ module Icons {
         12, 5, 2
     ] as Array<Number>;
 
+    //! Heart (heart-rate box), 9 x 9: two lobes and a tapered point.
+    const HEART_W = 9.0;
+    const HEART_RUNS = [
+        0, 1, 3,  0, 5, 3,
+        1, 0, 9,
+        2, 0, 9,
+        3, 0, 9,
+        4, 0, 9,
+        5, 0, 9,
+        6, 1, 7,
+        7, 2, 5,
+        8, 3, 3
+    ] as Array<Number>;
+
     //! Sunrise and sunset, 12 x 11 (not in the mockup; chosen for legibility on
     //! the MIP screen): a triangle (up = sunrise, down = sunset) in the text
     //! colour, a gap, then a solid half-sun in the accent colour on a horizon line.
@@ -110,6 +124,10 @@ module Icons {
     //! Sun (solar): filled disc and eight short rays.
     function drawSun(dc as Dc, left as Float, top as Float, s as Float) as Void {
         drawRuns(dc, SUN_RUNS, left, top, s);
+    }
+
+    function drawHeart(dc as Dc, left as Float, top as Float, s as Float) as Void {
+        drawRuns(dc, HEART_RUNS, left, top, s);
     }
 
     //! Sunrise (rising = true) or sunset. Two colours, so the caller passes them.

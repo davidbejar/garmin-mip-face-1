@@ -145,8 +145,9 @@ Moon labels: NEW, WAX CRES, 1ST QTR, WAX GIB, FULL, WAN GIB, LAST QTR, WAN CRES.
 ## 8. Low power
 
 - The screen stays on. Redraw the full face once a minute.
-- Version 1: hide the seconds in low power. Everything else stays the same.
-- Later option: draw seconds with `onPartialUpdate`, clipped to the seconds area only, and handle `onPowerBudgetExceeded`.
+- Seconds are always on (changed 2026-11-16 at the owner's request; replaces "hide the seconds in low power"):
+  draw them with `onPartialUpdate`, clipped to the seconds area only. If `onPowerBudgetExceeded` is called,
+  stop partial updates and hide the seconds in low power.
 
 ## 9. Settings
 

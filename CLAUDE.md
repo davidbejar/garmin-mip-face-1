@@ -23,7 +23,11 @@ A Connect IQ watch face written in Monkey C.
 - Use only the 64 MIP colours (each channel 0x00, 0x55, 0xAA or 0xFF).
 - No object allocation inside `onUpdate()`. Load fonts and bitmaps once, in `onLayout()` or `initialize()`.
 - Every data field handles null and shows the fallback from the spec.
-- Low power: full redraw once a minute, seconds hidden. Do not add `onPartialUpdate` unless I ask.
+- Low power: full redraw once a minute, and the seconds are always on: `onPartialUpdate` redraws only the
+  seconds area (clipped) every second. This is a deliberate decision by the owner. Never remove `onPartialUpdate`,
+  never hide or freeze the seconds in low power, and never "simplify" this back to once-a-minute updates.
+  The only exception: if `onPowerBudgetExceeded` is called, stop partial updates and hide the seconds while asleep.
+  If a change risks the power budget, ask first; do not drop the seconds to fix it.
 - Some API names in the spec are marked "(check)". Confirm them in the Connect IQ API docs
   (https://developer.garmin.com/connect-iq/api-docs/) before using them. Do not guess an API.
 - Request only the permissions the code uses.

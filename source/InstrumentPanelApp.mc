@@ -9,6 +9,7 @@ class InstrumentPanelApp extends Application.AppBase {
     }
 
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        return [new InstrumentPanelView()];
+        var view = new InstrumentPanelView();
+        return [view, new InstrumentPanelDelegate(view)];
     }
 }

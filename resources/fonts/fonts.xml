@@ -4,6 +4,7 @@
     <font id="Num12Font" filename="num12.fnt" antialias="false" />
     <font id="Num13Font" filename="num13.fnt" antialias="false" />
     <font id="Num11Font" filename="num11.fnt" antialias="false" />
+    <font id="Num15Font" filename="num15.fnt" antialias="false" />
     <font id="SunTimeFont" filename="sun11.fnt" antialias="false" />
     <font id="MonthFont" filename="month.fnt" antialias="false" />
     <font id="LabelFont" filename="label.fnt" antialias="false" />

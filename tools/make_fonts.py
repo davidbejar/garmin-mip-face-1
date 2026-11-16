@@ -27,6 +27,8 @@ MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY",
 #   gap None: the font's own spacing (side bearings kept).
 #   gap n:    drop side bearings and space every glyph exactly n px from the
 #             next (xadvance = ink width + n); `space` is the word gap in px.
+#   fixed:    with a gap, every glyph gets the width of the widest one (glyph
+#             centred in its cell), so numbers do not shift as digits change.
 FONTS = [
     # 64 px as in the spec.
     ("time", "BarlowCondensed-SemiBold.ttf", 64, "0123456789:", "aa", None),
@@ -39,6 +41,11 @@ FONTS = [
     ("num12", "BarlowCondensed-Bold.ttf", 17, "0123456789%d-", "threshold", None),
     ("num13", "BarlowCondensed-Bold.ttf", 18, "0123456789%d-", "threshold", None),
     ("num11", "BarlowCondensed-Bold.ttf", 14, "0123456789%d-", "threshold", None),
+    # Current heart rate: spec 20 px bold. 14 px digits are not reachable with
+    # hard edges (13 or 15), so 15 keeps it the largest number in the boxes.
+    # SemiBold, fixed width, 2 px gaps: Bold closed the counters of 0, 6 and 9
+    # and ran "77" together (user's choice after comparing options).
+    ("num15", "BarlowCondensed-SemiBold.ttf", 20, "0123456789-", "threshold", 2, None, True),
     # Sunrise and sunset times: same 11 px digits in SemiBold, lighter than the
     # Bold box numbers (user's choice after comparing weights in the simulator).
     ("sun11", "BarlowCondensed-SemiBold.ttf", 14, "0123456789-:", "threshold", None),
@@ -57,7 +64,7 @@ FONTS = [
 PAD = 1  # transparent gap between glyphs in the atlas
 
 
-def build(name, ttf, size, glyphs, mode, gap, space=None):
+def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False):
     font = ImageFont.truetype(os.path.join(SRC, ttf), size)
     ascent, descent = font.getmetrics()
 
@@ -84,6 +91,11 @@ def build(name, ttf, size, glyphs, mode, gap, space=None):
             cells.append((ch, mask, 0, iy0 - m, mask.width + gap))
         else:
             cells.append((ch, mask, ix0 - m, iy0 - m, round(font.getlength(ch))))
+
+    if fixed and gap is not None:
+        cell = max(mask.width for _, mask, *_ in cells)
+        cells = [(ch, mask, (cell - mask.width) // 2, yoff, cell + gap)
+                 for ch, mask, _, yoff, _ in cells]
 
     # Pack into one row-based atlas.
     atlas_w = 256

@@ -1,9 +1,11 @@
 import Toybox.Complications;
 import Toybox.Graphics;
 import Toybox.Lang;
+import Toybox.SensorHistory;
 import Toybox.System;
 import Toybox.Time;
 import Toybox.Time.Gregorian;
+import Toybox.UserProfile;
 import Toybox.WatchUi;
 
 //! Instrument panel V4a watch face (design/spec.md).
@@ -28,6 +30,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private const WEEK_BASELINE = 104.0;   // cap tops at y 96, level with the time digits
     private const WEEK_CAP_HEIGHT = 8.0;
     private const SECONDS_BASELINE = 141.0;
+    private const SECONDS_DIGIT_H = 12.0;   // num12 font
 
     // ---- Date block (§2 row 3): filled box, two centred lines ----
 
@@ -85,6 +88,30 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private const SUN_ICON_GAP = 3.0;    // icon to its time
     private const SUN_PAIR_GAP = 10.0;   // sunrise time to sunset icon
 
+    // ---- Heart-rate box (§2 row 9), measured from the mockup ----
+
+    // Left column at fixed positions (heart and label at the mockup's x 39,
+    // number at x 53) so nothing moves when the rate goes from 2 to 3 digits.
+    private const HEART_X = 39.0;
+    private const HEART_TOP = 166.0;
+    private const HR_VALUE_X = 53.0;
+    private const HR_LABEL_X = 39.0;
+    private const HR_VALUE_BASELINE = 179.0;
+    private const HR_LABEL_BASELINE = 191.0;
+    // Bar graph, right- and bottom-aligned inside the padding:
+    // right 232 - 2 px outline - 8 px padding = 222; bottom 198 - 2 - 6 = 190.
+    private const GRAPH_RIGHT = 222.0;
+    private const GRAPH_BOTTOM = 190.0;
+    private const GRAPH_BAR_W = 3.0;
+    private const GRAPH_BAR_PITCH = 5.0;   // 3 px bar + 2 px gap
+    // Bar height = 3 + (bpm - 50) / 80 * 25, clamped to 3..28 (§7).
+    private const BAR_MIN_H = 3.0;
+    private const BAR_MAX_H = 28.0;
+    private const BAR_BPM_FLOOR = 50.0;
+    private const BAR_BPM_SPAN = 80.0;
+    // History is re-read when a new 10-minute bar starts (allocates; see HeartRateGraph).
+    private const GRAPH_REFRESH_MINUTES = 10;
+
     // Capital height of date line 1 ("MON 16"), a system vector font.
     private const CAP_13 = 13.0;
 
@@ -103,6 +130,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _num12Font as FontType = Graphics.FONT_TINY;   // seconds, moon percent
     private var _num13Font as FontType = Graphics.FONT_SMALL;  // Body Battery, battery days
     private var _num11Font as FontType = Graphics.FONT_TINY;   // solar percent
+    private var _num15Font as FontType = Graphics.FONT_MEDIUM; // current heart rate
     private var _sunTimeFont as FontType = Graphics.FONT_TINY; // sunrise and sunset (SemiBold)
     private var _weekFont as FontType = Graphics.FONT_XTINY;
     private var _monthFont as FontType = Graphics.FONT_XTINY;
@@ -113,6 +141,16 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     private var _sx as Float = 1.0;
     private var _sy as Float = 1.0;
+
+    // Always-on seconds (user's request; replaces spec §8 v1, which hid them):
+    // onPartialUpdate() redraws only this clip each second in low power. If the
+    // power budget is exceeded the system stops partial updates and the seconds
+    // are hidden while asleep, as in v1.
+    private var _partialUpdates as Boolean = true;
+    private var _sleeping as Boolean = false;
+    private var _secondsClipY as Number = 0;
+    private var _secondsClipW as Number = 0;
+    private var _secondsClipH as Number = 0;
 
     private var _timeTop as Number = 0;
     private var _weekTop as Number = 0;
@@ -205,6 +243,30 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _sunIconTop as Float = 0.0;
     private var _sunTimeTop as Number = 0;
 
+    // Heart rate: current from the HEART_RATE complication (fallback: newest
+    // history sample), resting from the user profile, graph from SensorHistory.
+    private var _heartRateId as Complications.Id? = null;
+    private var _heartRate as Number? = null;
+    private var _restingHeartRate as Number? = null;
+    private var _graph as HeartRateGraph = new HeartRateGraph();
+    private var _graphSlot as Number = -1;
+    private var _graphBarX as Array<Number> = new Array<Number>[HeartRateGraph.BARS];
+    private var _graphBarTop as Array<Number> = new Array<Number>[HeartRateGraph.BARS];
+    private var _graphBottom as Number = 0;
+    private var _graphBarW as Number = 3;
+    private var _heartDirty as Boolean = true;
+    private var _heartText as String = "--";
+    private var _restText as String = "REST --";
+    private var _heartX as Float = 0.0;
+    private var _heartTextX as Number = 0;
+    private var _hrLabelX as Number = 0;
+    private var _heartTop as Float = 0.0;
+    private var _hrValueTop as Number = 0;
+    private var _hrLabelTop as Number = 0;
+
+    // Body Battery from SensorHistory, used when the complication has no value.
+    private var _bodyBatteryHistory as Number? = null;
+
     // Watch battery and solar
     private var _batteryCharge as Float = 0.0;
     private var _batteryKey as Number = -1;
@@ -230,6 +292,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _num12Font = WatchUi.loadResource(Rez.Fonts.Num12Font) as FontResource;
         _num13Font = WatchUi.loadResource(Rez.Fonts.Num13Font) as FontResource;
         _num11Font = WatchUi.loadResource(Rez.Fonts.Num11Font) as FontResource;
+        _num15Font = WatchUi.loadResource(Rez.Fonts.Num15Font) as FontResource;
         _sunTimeFont = WatchUi.loadResource(Rez.Fonts.SunTimeFont) as FontResource;
         _monthFont = WatchUi.loadResource(Rez.Fonts.MonthFont) as FontResource;
         _labelFont = WatchUi.loadResource(Rez.Fonts.LabelFont) as FontResource;
@@ -248,6 +311,15 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             _secondsAdvance[i] = dc.getTextWidthInPixels(digit, _num12Font);
         }
         _colonAdvance = dc.getTextWidthInPixels(":", _timeFont);
+        var widest = 0;
+        for (var i = 0; i < 10; i++) {
+            if (_secondsAdvance[i] > widest) {
+                widest = _secondsAdvance[i];
+            }
+        }
+        _secondsClipY = scaleY(SECONDS_BASELINE - SECONDS_DIGIT_H) - 1;
+        _secondsClipH = scaleY(SECONDS_BASELINE) + 1 - _secondsClipY;
+        _secondsClipW = 2 * widest + 1;
 
         // Date block
         _dateX = scaleX(DATE_X);
@@ -292,6 +364,24 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _sunIconTop = SUN_ICON_TOP * _sy;
         _sunTimeTop = topForBaseline(SUN_TIME_BASELINE, _sunTimeFont);
 
+        // Heart-rate box
+        _heartX = HEART_X * _sx;
+        _heartTextX = scaleX(HR_VALUE_X);
+        _hrLabelX = scaleX(HR_LABEL_X);
+        _heartTop = HEART_TOP * _sy;
+        _hrValueTop = topForBaseline(HR_VALUE_BASELINE, _num15Font);
+        _hrLabelTop = topForBaseline(HR_LABEL_BASELINE, _labelFont);
+        _graphBottom = scaleY(GRAPH_BOTTOM);
+        _graphBarW = scaleX(GRAPH_BAR_W);
+        if (_graphBarW < 1) {
+            _graphBarW = 1;
+        }
+        var bars = HeartRateGraph.BARS;
+        for (var i = 0; i < bars; i++) {
+            _graphBarX[i] = scaleX(GRAPH_RIGHT - GRAPH_BAR_W - (bars - 1 - i) * GRAPH_BAR_PITCH);
+            _graphBarTop[i] = _graphBottom;
+        }
+
         _boltPoints = new Array<Array<Float>>[Icons.BOLT_POINTS.size()];
         for (var i = 0; i < _boltPoints.size(); i++) {
             _boltPoints[i] = [0.0, 0.0];
@@ -306,6 +396,35 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         invalidateCaches();
     }
 
+    function onEnterSleep() as Void {
+        _sleeping = true;
+        WatchUi.requestUpdate();
+    }
+
+    function onExitSleep() as Void {
+        _sleeping = false;
+        WatchUi.requestUpdate();
+    }
+
+    //! Low power: redraw only the seconds, once a second.
+    function onPartialUpdate(dc as Dc) as Void {
+        if (!_partialUpdates) {
+            return;
+        }
+        var sec = System.getClockTime().sec;
+        dc.setClip(_sideX, _secondsClipY, _secondsClipW, _secondsClipH);
+        dc.setColor(Palette.BACKGROUND, Palette.BACKGROUND);
+        dc.clear();
+        drawSeconds(dc, sec);
+        dc.clearClip();
+    }
+
+    //! Called by the delegate when partial updates exceed the power budget.
+    function disablePartialUpdates() as Void {
+        _partialUpdates = false;
+        WatchUi.requestUpdate();
+    }
+
     function onUpdate(dc as Dc) as Void {
         var clock = System.getClockTime();
         var minute = clock.hour * 60 + clock.min;
@@ -316,6 +435,11 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             refreshDate(dc, now);
             refreshMoon(dc, now);
             refreshBattery(dc);
+            var slot = minute / GRAPH_REFRESH_MINUTES;
+            if (slot != _graphSlot) {
+                _graphSlot = slot;
+                refreshHeartHistory(now);
+            }
             logMemory("minute");
         }
         if (_bodyBatteryDirty) {
@@ -323,6 +447,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         }
         if (_sunTimesDirty) {
             refreshSunTimes(dc);
+        }
+        if (_heartDirty) {
+            refreshHeart();
         }
 
         dc.setColor(Palette.BACKGROUND, Palette.BACKGROUND);
@@ -333,6 +460,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         drawMoonBox(dc);
         drawBodyBatteryBox(dc);
         drawSidePanel(dc);
+        drawHeartBox(dc);
         drawTime(dc, clock.sec);
     }
 
@@ -347,10 +475,31 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         } else if (id.equals(_sunsetId)) {
             _sunset = readComplication(_sunsetId);
             _sunTimesDirty = true;
+        } else if (id.equals(_heartRateId)) {
+            _heartRate = readComplication(_heartRateId);
+            _heartDirty = true;
         }
     }
 
     // ---- Drawing (no allocation) ----
+
+    private function drawHeartBox(dc as Dc) as Void {
+        dc.setColor(Palette.ACCENT, Graphics.COLOR_TRANSPARENT);
+        Icons.drawHeart(dc, _heartX, _heartTop, _sx);
+        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(_heartTextX, _hrValueTop, _num15Font, _heartText, Graphics.TEXT_JUSTIFY_LEFT);
+
+        // Bars: bottom-aligned; a bar with no data has its top on the bottom line.
+        for (var i = 0; i < HeartRateGraph.BARS; i++) {
+            var top = _graphBarTop[i];
+            if (top < _graphBottom) {
+                dc.fillRectangle(_graphBarX[i], top, _graphBarW, _graphBottom - top);
+            }
+        }
+
+        dc.setColor(Palette.LABEL, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(_hrLabelX, _hrLabelTop, _labelFont, _restText, Graphics.TEXT_JUSTIFY_LEFT);
+    }
 
     private function drawSunTimes(dc as Dc) as Void {
         Icons.drawSunEvent(dc, _sunriseIconX, _sunIconTop, _sx, true, Palette.TEXT, Palette.ACCENT);
@@ -369,6 +518,14 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
         dc.drawText(_sideX, _weekTop, _weekFont, _weekText, Graphics.TEXT_JUSTIFY_LEFT);
 
+        // Without partial updates, seconds would freeze while asleep: hide them.
+        if (_partialUpdates || !_sleeping) {
+            drawSeconds(dc, sec);
+        }
+    }
+
+    private function drawSeconds(dc as Dc, sec as Number) as Void {
+        dc.setColor(Palette.TEXT, Graphics.COLOR_TRANSPARENT);
         var tens = sec / 10;
         dc.drawText(_sideX, _secondsTop, _num12Font, tens, Graphics.TEXT_JUSTIFY_LEFT);
         dc.drawText(_sideX + _secondsAdvance[tens], _secondsTop, _num12Font, sec % 10, Graphics.TEXT_JUSTIFY_LEFT);
@@ -447,6 +604,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _solarKey = -2;
         _bodyBatteryDirty = true;
         _sunTimesDirty = true;
+        _heartDirty = true;
+        _graphSlot = -1;
     }
 
     //! Splits HH:MM into digits and places each glyph with the time's tracking.
@@ -553,10 +712,80 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     private function refreshBodyBattery(dc as Dc) as Void {
         _bodyBatteryDirty = false;
-        var value = _bodyBattery;
+        var value = (_bodyBattery != null) ? _bodyBattery : _bodyBatteryHistory;
         _bodyBatteryText = (value == null) ? "--" : value.toString();
         _boltX = rowLeft(dc, BOX_BODY_BATTERY, Icons.BOLT_W, BOLT_GAP, _bodyBatteryText, _num13Font);
         _bodyBatteryTextX = round(_boltX + (Icons.BOLT_W + BOLT_GAP) * _sx);
+    }
+
+    //! Re-reads heart-rate history, resting heart rate and the Body Battery
+    //! fallback. Allocates (SensorHistory, UserProfile), so it runs only when a
+    //! new 10-minute bar starts.
+    private function refreshHeartHistory(now as Time.Moment) as Void {
+        _graph.rebuild(now.value());
+        var bottom = GRAPH_BOTTOM;
+        for (var i = 0; i < HeartRateGraph.BARS; i++) {
+            var bpm = _graph.bpm[i];
+            if (bpm <= 0) {
+                _graphBarTop[i] = _graphBottom;
+                continue;
+            }
+            var h = BAR_MIN_H + (bpm - BAR_BPM_FLOOR) / BAR_BPM_SPAN * (BAR_MAX_H - BAR_MIN_H);
+            if (h < BAR_MIN_H) {
+                h = BAR_MIN_H;
+            } else if (h > BAR_MAX_H) {
+                h = BAR_MAX_H;
+            }
+            _graphBarTop[i] = scaleY(bottom - h);
+        }
+        _restingHeartRate = readRestingHeartRate();
+        logGraph();
+        var history = readBodyBatteryHistory();
+        if (history != _bodyBatteryHistory) {
+            _bodyBatteryHistory = history;
+            _bodyBatteryDirty = true;
+        }
+        _heartDirty = true;
+    }
+
+    //! Current bpm (complication, else newest history sample) and the REST label.
+    private function refreshHeart() as Void {
+        _heartDirty = false;
+        var hr = (_heartRate != null) ? _heartRate : _graph.latest;
+        _heartText = (hr == null) ? "--" : hr.toString();
+        var rest = _restingHeartRate;
+        _restText = (rest == null) ? "REST --" : "REST " + rest.toString();
+    }
+
+    //! 7-day average resting heart rate, else the configured one (§7).
+    private function readRestingHeartRate() as Number? {
+        if (!(Toybox has :UserProfile)) {
+            return null;
+        }
+        var profile = UserProfile.getProfile();
+        var rest = null;
+        if (profile has :averageRestingHeartRate) {
+            rest = profile.averageRestingHeartRate;
+        }
+        if (rest == null || rest <= 0) {
+            rest = profile.restingHeartRate;
+        }
+        return (rest != null && rest > 0) ? rest : null;
+    }
+
+    //! Newest Body Battery sample, or null.
+    private function readBodyBatteryHistory() as Number? {
+        if (!(Toybox has :SensorHistory) || !(SensorHistory has :getBodyBatteryHistory)) {
+            return null;
+        }
+        var sample = SensorHistory.getBodyBatteryHistory({
+            :period => 1,
+            :order => SensorHistory.ORDER_NEWEST_FIRST
+        }).next();
+        if (sample == null || sample.data == null) {
+            return null;
+        }
+        return sample.data.toNumber();
     }
 
     //! Places "icon time  icon time" centred on the face (§2 row 1).
@@ -591,7 +820,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         return hour.format("%02d") + ":" + min.format("%02d");
     }
 
-    // ---- Complications: Body Battery, sunrise, sunset ----
+    // ---- Complications: Body Battery, sunrise, sunset, heart rate ----
 
     private function subscribeComplications() as Void {
         try {
@@ -602,9 +831,11 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _bodyBatteryId = subscribe(Complications.COMPLICATION_TYPE_BODY_BATTERY);
         _sunriseId = subscribe(Complications.COMPLICATION_TYPE_SUNRISE);
         _sunsetId = subscribe(Complications.COMPLICATION_TYPE_SUNSET);
+        _heartRateId = subscribe(Complications.COMPLICATION_TYPE_HEART_RATE);
         _bodyBattery = readComplication(_bodyBatteryId);
         _sunrise = readComplication(_sunriseId);
         _sunset = readComplication(_sunsetId);
+        _heartRate = readComplication(_heartRateId);
     }
 
     private function subscribe(type as Complications.Type) as Complications.Id? {
@@ -681,4 +912,20 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     (:release)
     private function logMemory(tag as String) as Void {
+    }
+
+    (:debug)
+    private function logGraph() as Void {
+        var bars = 0;
+        for (var i = 0; i < HeartRateGraph.BARS; i++) {
+            if (_graph.bpm[i] > 0) {
+                bars++;
+            }
+        }
+        System.println("hr graph: " + bars + "/" + HeartRateGraph.BARS + " bars, latest=" + _graph.latest
+            + " rest=" + _restingHeartRate + " bpm=" + _graph.bpm);
+    }
+
+    (:release)
+    private function logGraph() as Void {
     }}
