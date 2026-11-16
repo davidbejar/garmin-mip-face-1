@@ -13,3 +13,6 @@ developer_key*
 # OS / editor
 .DS_Store
 .vscode/
+
+# Local settings (developer key path)
+.env

@@ -111,7 +111,7 @@ API names marked (check) are from memory. Confirm each against the Connect IQ AP
 
 | Field | Source | Format | When there is no data |
 |-------|--------|--------|------------------------|
-| Time | `System.getClockTime()`; follow the device 12/24-hour setting | HH:MM | n/a |
+| Time | `System.getClockTime()`; always 24-hour, whatever the device setting (decided 2026-11-16) | HH:MM | n/a |
 | Seconds | `System.getClockTime().sec` | two digits | hidden in low power |
 | Date | `Time.Gregorian.info()` (check) | "MON 16" / "NOVEMBER" | n/a |
 | Week number | computed: ISO 8601 week | "WK 47" | n/a |

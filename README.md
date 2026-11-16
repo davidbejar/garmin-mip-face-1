@@ -9,7 +9,7 @@ It is designed for the 260 × 260 px always-on MIP (memory-in-pixel) screen and 
 
 ## What it shows
 
-- **Time** (follows the 12/24-hour setting), **seconds**, and the **ISO week number**
+- **Time** (24-hour), **seconds**, and the **ISO week number**
 - **Date block**: weekday, day, and month
 - **Sunrise and sunset** times
 - **Moon phase**: icon, percent lit, and phase name
