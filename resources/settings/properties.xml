@@ -3,4 +3,6 @@
     <property id="TextColour" type="number">0</property>
     <property id="AccentColour" type="number">0</property>
     <property id="HeartRateLabel" type="number">0</property>
+    <property id="TimeFont" type="number">0</property>
+    <property id="RubberDuck" type="number">0</property>
 </properties>

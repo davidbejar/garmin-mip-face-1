@@ -11,6 +11,10 @@ module Demo {
 
     const STATE = 0;
 
+    //! Shown time in minutes after midnight (e.g. 22 * 60 + 22), or -1 for the
+    //! clock. Commit it as -1.
+    const TIME = -1;
+
     // Indexed by STATE - 1, read off the three mockups.
     const BODY_BATTERY = [68, 74, 12] as Array<Number>;
     const BATTERY_DAYS = [11, 11, 3] as Array<Number>;

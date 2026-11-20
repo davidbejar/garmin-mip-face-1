@@ -16,3 +16,9 @@ developer_key*
 
 # Local settings (developer key path)
 .env
+
+# Design preview renders and downloaded candidate fonts (tools/preview)
+tools/preview/cache/
+tools/preview/out/
+tools/preview/.venv/
+__pycache__/

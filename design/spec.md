@@ -159,6 +159,20 @@ Moon labels: NEW, WAX CRES, 1ST QTR, WAX GIB, FULL, WAN GIB, LAST QTR, WAN CRES.
   red, blue, red and green, which made some rules invisible.
 - Heart-rate label (added 2026-11-16): "REST nn" (7-day average resting heart rate, default) or "MAX nn" (highest
   reading in the graph's 4-hour window, i.e. the tallest bar). "MAX --" when the graph has no data.
+- Time font (added 2026-11-20; picked from previews rendered by `tools/preview`). Hours and minutes only; the
+  seconds and week number keep their fonts. Every option fits the classic time's box (digits at most 47 px, widest
+  time at most 127 px, baseline 141), and the week number's top follows the digit tops.
+  - Classic (default): Barlow Condensed SemiBold, 47 px digits.
+  - Bold: Saira Condensed ExtraBold, 41 px digits.
+  - LCD: Casio-style 7-segment digits drawn in code, 47 px, slanted, hard edges.
+  - Dot matrix: 5×7 grid of round anti-aliased dots drawn in code, 45 px. The zero is slashed and the 1 has a wide
+    foot (after the BRAZEN "GHOSTLINE" face).
+  - Handwritten: Kalam Bold, 35 px digits.
+- Rubber duck mode (added 2026-11-20): Off (default) or On. When on, every 2 in the hours and minutes (nothing
+  else) is drawn as a rubber duck in the 2's own box: yellow body (0xFFFF00), orange beak (0xFF5500, fixed, not the
+  accent), outlined in the text colour. The duck is as tall as the digits and no wider than the 2. It has a round
+  head, a tall body and a thin neck only where the digits are taller than head plus body. In the LCD font it slants
+  with the digits.
 - Available on the watch (system Watch Face menu, via `getSettingsView`), in the simulator's settings editor, and in
   Garmin Connect for store installs.
 - Prefer on-device settings so they can be tested by sideloading. Supporting the fēnix 8 native watch face editor is a later step.

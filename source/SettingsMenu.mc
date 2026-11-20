@@ -3,12 +3,13 @@ import Toybox.Lang;
 import Toybox.WatchUi;
 
 //! On-watch settings (design/spec.md §9), shown from the system Watch Face menu
-//! via AppBase.getSettingsView(). Three items; each opens its option list with
+//! via AppBase.getSettingsView(). One item per setting; each opens its option list with
 //! the current choice marked. Objects exist only while the menu is open.
 class SettingsMenu extends WatchUi.Menu2 {
 
     //! Per setting: property key, title, option names.
-    static const KEYS = [Settings.TEXT_COLOUR, Settings.ACCENT_COLOUR, Settings.HEART_RATE_LABEL] as Array<String>;
+    static const KEYS = [Settings.TEXT_COLOUR, Settings.ACCENT_COLOUR, Settings.HEART_RATE_LABEL,
+        Settings.TIME_FONT, Settings.RUBBER_DUCK] as Array<String>;
 
     function initialize() {
         Menu2.initialize({:title => Rez.Strings.SettingsTitle});
@@ -20,7 +21,8 @@ class SettingsMenu extends WatchUi.Menu2 {
     }
 
     static function title(setting as Number) as ResourceId {
-        var titles = [Rez.Strings.TextColourTitle, Rez.Strings.AccentTitle, Rez.Strings.HeartRateLabelTitle] as Array<ResourceId>;
+        var titles = [Rez.Strings.TextColourTitle, Rez.Strings.AccentTitle, Rez.Strings.HeartRateLabelTitle,
+            Rez.Strings.TimeFontTitle, Rez.Strings.RubberDuckTitle] as Array<ResourceId>;
         return titles[setting];
     }
 
@@ -31,7 +33,14 @@ class SettingsMenu extends WatchUi.Menu2 {
         if (setting == 1) {
             return [Rez.Strings.AccentOrange, Rez.Strings.AccentMagenta, Rez.Strings.AccentAmber] as Array<ResourceId>;
         }
-        return [Rez.Strings.HeartRateRest, Rez.Strings.HeartRateMax] as Array<ResourceId>;
+        if (setting == 2) {
+            return [Rez.Strings.HeartRateRest, Rez.Strings.HeartRateMax] as Array<ResourceId>;
+        }
+        if (setting == 3) {
+            return [Rez.Strings.TimeFontClassic, Rez.Strings.TimeFontBold, Rez.Strings.TimeFontLcd,
+                Rez.Strings.TimeFontDots, Rez.Strings.TimeFontHand] as Array<ResourceId>;
+        }
+        return [Rez.Strings.Off, Rez.Strings.On] as Array<ResourceId>;
     }
 }
 

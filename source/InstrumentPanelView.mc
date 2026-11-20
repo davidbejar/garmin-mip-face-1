@@ -20,18 +20,14 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     // ---- Time (§2 rows 5-7) ----
 
-    // Ink starts at x 16, baseline y 141.
-    // The mockup sets the time with -0.02 em letter-spacing (-1.25 px at 64 px).
-    private const TIME_X = 16.0;
-    private const TIME_BASELINE = 141.0;
-    private const TIME_TRACKING = -1.25;
-
+    // Hours and minutes: see TimeDisplay.mc (time-font setting, rubber duck mode).
     // Week number and seconds, 3 px right of the time.
     private const SIDE_GAP = 3.0;
     // Week number in the hard-edged label font (7 px capitals, owner's choice):
     // the mockup's 11 px text is 30-31 px wide, which runs into the side panel
     // at wide times such as 04:44; this is 27-28 px and always clears it.
-    private const WEEK_BASELINE = 103.0;   // cap tops at y 96, level with the time digits
+    private const WEEK_BASELINE = 103.0;   // cap tops at y 96, level with the classic time digits
+    private const CLASSIC_DIGIT_H = 47.0;  // the week number moves down with shorter digits
     private const SECONDS_BASELINE = 141.0;
     private const SECONDS_DIGIT_H = 12.0;   // num12 font
 
@@ -144,7 +140,6 @@ class InstrumentPanelView extends WatchUi.WatchFace {
 
     // ---- Fonts, loaded once in onLayout() ----
 
-    private var _timeFont as FontType = Graphics.FONT_NUMBER_HOT;
     // Hard-edged Barlow Condensed numbers (tools/make_fonts.py): digit heights 12, 13, 11.
     private var _num12Font as FontType = Graphics.FONT_TINY;   // seconds, moon percent
     private var _num13Font as FontType = Graphics.FONT_SMALL;  // Body Battery, battery days
@@ -171,10 +166,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _secondsClipW as Number = 0;
     private var _secondsClipH as Number = 0;
 
-    private var _timeTop as Number = 0;
     private var _weekTop as Number = 0;
     private var _secondsTop as Number = 0;
-    private var _timeTracking as Float = 0.0;
     private var _sideGap as Float = 0.0;
 
     private var _dateX as Number = 0;
@@ -205,9 +198,7 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _sunTop as Float = 0.0;
     private var _solarTop as Number = 0;
 
-    // Glyph advances of the bitmap fonts, measured once in onLayout().
-    private var _timeAdvance as Array<Number> = new Array<Number>[10];
-    private var _colonAdvance as Number = 0;
+    // Glyph advances of the seconds font, measured once in onLayout().
     private var _secondsAdvance as Array<Number> = new Array<Number>[10];
 
     // Reused by Icons.drawBolt so drawing never allocates.
@@ -216,9 +207,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     // ---- Time layout, rebuilt when the minute changes ----
 
     private var _lastMinute as Number = -1;
-    private var _timeDigits as Array<Number> = [0, 0, 0, 0];
-    private var _timeDigitX as Array<Number> = [0, 0, 0, 0];
-    private var _colonX as Number = 0;
+    private var _time as TimeDisplay = new TimeDisplay();
+    private var _laidOut as Boolean = false;
+    private var _antiAlias as Boolean = false;   // dc.setAntiAlias available
     private var _sideX as Number = 0;
 
     // ---- Date text, rebuilt when the day changes ----
@@ -308,6 +299,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     private var _ink as Number = 0x000000;
     private var _accent as Number = 0xFF5500;
     private var _heartRateLabel as Number = Settings.LABEL_REST;
+    private var _timeFontStyle as Number = Settings.TIME_CLASSIC;
+    private var _rubberDuck as Boolean = false;
 
     // Colours resolved by the colour rules (§6) whenever a value changes.
     private var _batteryIconColour as Number = 0;   // icon and charge bar
@@ -343,6 +336,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     //! editor or the on-watch menu): re-read it and rebuild every cached colour.
     function reloadSettings() as Void {
         loadSettings();
+        if (_laidOut) {
+            _time.configure(null, _timeFontStyle, _rubberDuck, _sx, _sy, _antiAlias);
+        }
         invalidateCaches();
     }
 
@@ -350,6 +346,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _ink = Settings.textColour();
         _accent = Settings.accentColour();
         _heartRateLabel = Settings.heartRateLabel();
+        _timeFontStyle = Settings.timeFont();
+        _rubberDuck = Settings.rubberDuck();
     }
 
     function onLayout(dc as Dc) as Void {
@@ -357,7 +355,6 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _sy = dc.getHeight() / SPEC_SIZE;
 
         // Bitmap fonts are rasterised at the 260 px size (tools/make_fonts.py).
-        _timeFont = WatchUi.loadResource(Rez.Fonts.TimeFont) as FontResource;
         _num12Font = WatchUi.loadResource(Rez.Fonts.Num12Font) as FontResource;
         _num13Font = WatchUi.loadResource(Rez.Fonts.Num13Font) as FontResource;
         _num11Font = WatchUi.loadResource(Rez.Fonts.Num11Font) as FontResource;
@@ -369,17 +366,15 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _cap13Font = vectorFont("RobotoCondensedBold", CAP_13 / ROBOTO_CONDENSED_CAP_RATIO, Graphics.FONT_SMALL);
 
         // Time
-        _timeTop = topForBaseline(TIME_BASELINE, _timeFont);
+        _antiAlias = dc has :setAntiAlias;
+        _time.configure(dc, _timeFontStyle, _rubberDuck, _sx, _sy, _antiAlias);
+        _laidOut = true;
         _weekTop = topForBaseline(WEEK_BASELINE, _weekFont);
         _secondsTop = topForBaseline(SECONDS_BASELINE, _num12Font);
-        _timeTracking = TIME_TRACKING * _sx;
         _sideGap = SIDE_GAP * _sx;
         for (var i = 0; i < 10; i++) {
-            var digit = i.toString();
-            _timeAdvance[i] = dc.getTextWidthInPixels(digit, _timeFont);
-            _secondsAdvance[i] = dc.getTextWidthInPixels(digit, _num12Font);
+            _secondsAdvance[i] = dc.getTextWidthInPixels(i.toString(), _num12Font);
         }
-        _colonAdvance = dc.getTextWidthInPixels(":", _timeFont);
         var widest = 0;
         for (var i = 0; i < 10; i++) {
             if (_secondsAdvance[i] > widest) {
@@ -515,7 +510,8 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         if (minute != _lastMinute) {
             _lastMinute = minute;
             var now = Time.now();
-            layoutTime(clock.hour, clock.min);
+            var shown = demoMinute(minute);
+            layoutTime(dc, shown / 60, shown % 60);
             refreshDate(dc, now);
             refreshMoon(dc, now);
             refreshBattery(dc);
@@ -634,12 +630,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     }
 
     private function drawTime(dc as Dc, sec as Number) as Void {
-        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
-        for (var i = 0; i < 4; i++) {
-            dc.drawText(_timeDigitX[i], _timeTop, _timeFont, _timeDigits[i], Graphics.TEXT_JUSTIFY_LEFT);
-        }
-        dc.drawText(_colonX, _timeTop, _timeFont, ":", Graphics.TEXT_JUSTIFY_LEFT);
+        _time.draw(dc, _ink);
 
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         dc.drawText(_sideX, _weekTop, _weekFont, _weekText, Graphics.TEXT_JUSTIFY_LEFT);
 
         // Without partial updates, seconds would freeze while asleep: hide them.
@@ -737,24 +730,13 @@ class InstrumentPanelView extends WatchUi.WatchFace {
         _distanceKey = -2;
     }
 
-    //! Splits HH:MM into digits and places each glyph with the time's tracking.
-    //! Always a 24-hour clock, whatever the device's 12/24-hour setting.
-    private function layoutTime(hour as Number, min as Number) as Void {
-        _timeDigits[0] = hour / 10;
-        _timeDigits[1] = hour % 10;
-        _timeDigits[2] = min / 10;
-        _timeDigits[3] = min % 10;
-
-        var x = TIME_X * _sx;
-        for (var i = 0; i < 4; i++) {
-            if (i == 2) {
-                _colonX = round(x);
-                x += _colonAdvance + _timeTracking;
-            }
-            _timeDigitX[i] = round(x);
-            x += _timeAdvance[_timeDigits[i]] + _timeTracking;
-        }
-        _sideX = round(x + _sideGap);
+    //! Places HH:MM (always 24-hour, whatever the device's 12/24-hour setting),
+    //! then the week number and seconds column to its right. The week number's
+    //! top follows the digit tops of the chosen time font.
+    private function layoutTime(dc as Dc, hour as Number, min as Number) as Void {
+        _time.layout(dc, hour, min);
+        _sideX = round(_time.endX() + _sideGap);
+        _weekTop = topForBaseline(WEEK_BASELINE + CLASSIC_DIGIT_H - _time.digitHeight(), _weekFont);
     }
 
     //! Rebuilds the date and week text when the calendar day changes.
@@ -1181,6 +1163,18 @@ class InstrumentPanelView extends WatchUi.WatchFace {
     (:release)
     private function demoActive() as Boolean {
         return false;
+    }
+
+    //! Debug builds: Demo.TIME (minutes after midnight) replaces the clock's
+    //! hours and minutes, to check fonts and ducks at chosen times.
+    (:debug)
+    private function demoMinute(minute as Number) as Number {
+        return Demo.TIME >= 0 ? Demo.TIME : minute;
+    }
+
+    (:release)
+    private function demoMinute(minute as Number) as Number {
+        return minute;
     }
 
     (:debug)

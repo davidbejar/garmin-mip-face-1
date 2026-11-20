@@ -11,6 +11,8 @@ module Settings {
     const TEXT_COLOUR = "TextColour";
     const ACCENT_COLOUR = "AccentColour";
     const HEART_RATE_LABEL = "HeartRateLabel";
+    const TIME_FONT = "TimeFont";
+    const RUBBER_DUCK = "RubberDuck";
 
     //! Black (default), navy, dark purple.
     const TEXT_COLOURS = [0x000000, 0x000055, 0x550055] as Array<Number>;
@@ -20,6 +22,14 @@ module Settings {
     //! HeartRateLabel values.
     const LABEL_REST = 0;   // 7-day average resting heart rate (default)
     const LABEL_MAX = 1;    // highest reading in the graph's 4-hour window
+
+    //! TimeFont values (owner's choice 2026-11-20; previews in tools/preview).
+    const TIME_CLASSIC = 0;   // Barlow Condensed SemiBold (default)
+    const TIME_BOLD = 1;      // Saira Condensed ExtraBold
+    const TIME_LCD = 2;       // 7-segment, drawn in code
+    const TIME_DOTS = 3;      // 5x7 dot matrix, drawn in code
+    const TIME_HAND = 4;      // Kalam Bold
+    const TIME_FONT_COUNT = 5;
 
     function textColour() as Number {
         return TEXT_COLOURS[index(TEXT_COLOUR, TEXT_COLOURS.size())];
@@ -31,6 +41,15 @@ module Settings {
 
     function heartRateLabel() as Number {
         return index(HEART_RATE_LABEL, 2);
+    }
+
+    function timeFont() as Number {
+        return index(TIME_FONT, TIME_FONT_COUNT);
+    }
+
+    //! Rubber duck mode: every 2 in the hours and minutes becomes a duck. Off by default.
+    function rubberDuck() as Boolean {
+        return index(RUBBER_DUCK, 2) == 1;
     }
 
     //! Stored index for key, or 0 (the default) if missing or out of range.

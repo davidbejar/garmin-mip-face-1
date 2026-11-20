@@ -14,4 +14,13 @@
     <string id="HeartRateLabelTitle">Heart-rate label</string>
     <string id="HeartRateRest">Resting (REST)</string>
     <string id="HeartRateMax">4-hour max (MAX)</string>
+    <string id="TimeFontTitle">Time font</string>
+    <string id="TimeFontClassic">Classic</string>
+    <string id="TimeFontBold">Bold</string>
+    <string id="TimeFontLcd">LCD</string>
+    <string id="TimeFontDots">Dot matrix</string>
+    <string id="TimeFontHand">Handwritten</string>
+    <string id="RubberDuckTitle">Rubber duck mode</string>
+    <string id="Off">Off</string>
+    <string id="On">On</string>
 </strings>

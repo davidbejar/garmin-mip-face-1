@@ -5,7 +5,8 @@ The fēnix 8 system fonts are too wide for the time at the mockup's size, and
 too soft at the smallest label sizes (design/spec.md §3). These fonts use
 Barlow / Barlow Condensed (SIL OFL), rasterised with only the glyphs needed.
 
-Usage (needs Pillow):  python3 tools/make_fonts.py
+Usage (needs Pillow):  python3 tools/make_fonts.py [name ...]
+                       With names, only those fonts are rebuilt (others stay byte-identical).
 Output:                resources/fonts/<name>.fnt and <name>.png
 """
 import os
@@ -32,6 +33,12 @@ MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY",
 FONTS = [
     # 64 px as in the spec.
     ("time", "BarlowCondensed-SemiBold.ttf", 64, "0123456789:", "aa", None),
+    # Time-font setting (owner's choice 2026-11-20, previews in tools/preview).
+    # Each size is the largest whose widest time (with the code's tracking)
+    # still fits the 127 px the Barlow time takes at 00:00, so the week number
+    # always clears the side panel: Saira 41 px digits, Kalam 35 px digits.
+    ("time_saira", "SairaCondensed-ExtraBold.ttf", 60, "0123456789:", "aa", None),
+    ("time_kalam", "Kalam-Bold.ttf", 48, "0123456789:", "aa", None),
     # Small numbers with hard edges (system fonts were too light on the MIP
     # screen). Hinting only lands on some digit heights, so the sizes are the
     # nearest to the mockup:
@@ -171,8 +178,12 @@ def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False):
 
 
 if __name__ == "__main__":
+    import sys
     os.makedirs(OUT, exist_ok=True)
+    only = set(sys.argv[1:])
     for spec in FONTS:
+        if only and spec[0] not in only:
+            continue
         advances = build(*spec)
         if spec[0] == "label":
             font = ImageFont.truetype(os.path.join(SRC, spec[1]), spec[2])

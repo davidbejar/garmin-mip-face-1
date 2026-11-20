@@ -21,4 +21,19 @@
             <listEntry value="1">@Strings.HeartRateMax</listEntry>
         </settingConfig>
     </setting>
+    <setting propertyKey="@Properties.TimeFont" title="@Strings.TimeFontTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.TimeFontClassic</listEntry>
+            <listEntry value="1">@Strings.TimeFontBold</listEntry>
+            <listEntry value="2">@Strings.TimeFontLcd</listEntry>
+            <listEntry value="3">@Strings.TimeFontDots</listEntry>
+            <listEntry value="4">@Strings.TimeFontHand</listEntry>
+        </settingConfig>
+    </setting>
+    <setting propertyKey="@Properties.RubberDuck" title="@Strings.RubberDuckTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.Off</listEntry>
+            <listEntry value="1">@Strings.On</listEntry>
+        </settingConfig>
+    </setting>
 </settings>
