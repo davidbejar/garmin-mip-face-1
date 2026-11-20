@@ -12,6 +12,8 @@ Target: fēnix 8 Solar 47mm (`fenix8solar47mm`, from `manifest.xml`).
 ```sh
 ./build.sh          # bin/WatchFace.prg, with -w (warnings on)
 ./build.sh run      # build, then load into a running simulator
+./build.sh release  # release build (-r, debug code stripped): bin/WatchFace-release.prg
+store/package.sh    # signed store package store/InstrumentPanel.iq (local only, refuses demo values)
 ```
 
 - `build.sh` reads the developer key path from the git-ignored `.env`

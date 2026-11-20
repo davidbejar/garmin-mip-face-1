@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Build the watch face. Reads GARMIN_DEV_KEY from .env (not committed).
-# Usage: ./build.sh            build bin/WatchFace.prg
-#        ./build.sh run        build, then load into a running simulator
+# Usage: ./build.sh            debug build: bin/WatchFace.prg (memory logging, Demo module)
+#        ./build.sh run        debug build, then load into a running simulator
+#        ./build.sh release    release build (-r): bin/WatchFace-release.prg, debug code stripped
+# The store package (.iq) is built by store/package.sh (local only).
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -14,6 +16,10 @@ SDK_DIR="${CIQ_SDK:-$(cat "$HOME/Library/Application Support/Garmin/ConnectIQ/cu
 SDK_BIN="${SDK_DIR%/}/bin"
 
 mkdir -p bin
+if [[ "${1:-}" == "release" ]]; then
+    "$SDK_BIN/monkeyc" -f monkey.jungle -d "$DEVICE" -o bin/WatchFace-release.prg -y "$GARMIN_DEV_KEY" -w -r
+    exit 0
+fi
 "$SDK_BIN/monkeyc" -f monkey.jungle -d "$DEVICE" -o bin/WatchFace.prg -y "$GARMIN_DEV_KEY" -w
 
 if [[ "${1:-}" == "run" ]]; then
