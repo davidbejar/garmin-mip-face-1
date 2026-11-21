@@ -33,11 +33,31 @@ Then run `./build.sh run` in the background and read its output after
 about 12 s. To reload, stop the old `monkeydo` (`pkill -f 'monkeydo bin/WatchFace.prg'`)
 and run again.
 
-This session cannot capture the screen or the simulator window: macOS denies
-both screen recording and window queries. Don't retry. Ask the owner to look at
-the simulator or send a screenshot. When a screenshot arrives, list the
-differences from the mockup (`design/v4a-*.png`) or the approved preview before
-changing code.
+### Capturing the simulator
+
+The owner granted Screen Recording to the app running Claude Code (2026-11-20),
+so the simulator can be captured directly. Capture **only its window**: a
+full-screen `screencapture` picks up any window lying over the simulator (the
+terminal is translucent and bleeds into the face).
+
+1. Find the window id (needs `pyobjc-framework-Quartz` in a scratch venv):
+   ```python
+   import Quartz
+   for w in Quartz.CGWindowListCopyWindowInfo(Quartz.kCGWindowListOptionAll, Quartz.kCGNullWindowID):
+       if "CIQ Simulator" in (w.get("kCGWindowName") or ""):
+           print(w["kCGWindowNumber"])
+   ```
+   The id changes whenever the simulator restarts.
+2. `screencapture -x -o -l<id> <file>.png`: the window at 2x (Retina), even when covered.
+3. Find the 520 px face by aligning against a known screenshot (for example
+   `store/screenshots/normal@2x.png`), comparing the heart-rate box and tiles
+   region (rows 300-470) over candidate offsets. That 520 px crop is the @2x image.
+   Halve it for 260 px.
+
+Force data, time and settings as described below, and restore the files
+afterwards. If capture fails, ask the owner to send a screenshot. When comparing
+against the mockup (`design/v4a-*.png`) or an approved preview, list the
+differences before changing code.
 
 ## Memory
 
