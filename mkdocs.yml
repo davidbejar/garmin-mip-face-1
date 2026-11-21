@@ -1,0 +1,109 @@
+site_name: Instrument Panel — engineering notes
+site_description: >-
+  Technical documentation for a Connect IQ watch face written in Monkey C for the
+  Garmin fēnix 8 Solar: architecture, rendering, memory and power engineering,
+  algorithms and tooling.
+site_author: David Bejar
+repo_url: https://github.com/davidbejar/garmin-mip-face-1
+repo_name: davidbejar/garmin-mip-face-1
+edit_uri: edit/main/docs/
+copyright: Code under the MIT licence. Fonts under the SIL Open Font License.
+
+theme:
+  name: material
+  language: en
+  icon:
+    logo: material/watch-variant
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Overview: index.md
+  - Architecture:
+      - architecture/index.md
+      - Rendering pipeline: architecture/rendering.md
+      - Layout and scaling: architecture/layout.md
+      - Low power and partial updates: architecture/low-power.md
+      - Memory engineering: architecture/memory.md
+  - Data:
+      - Data sources and fallbacks: data/sources.md
+      - Heart-rate graph: data/heart-rate-graph.md
+      - Calendar and moon maths: data/calendar-and-moon.md
+  - Graphics:
+      - Colour on a 64-colour screen: graphics/colour.md
+      - Bitmap font pipeline: graphics/fonts.md
+      - Icons drawn in code: graphics/icons.md
+      - Time styles and the rubber duck: graphics/time-styles.md
+  - Settings: settings.md
+  - Tooling:
+      - Build, debug and release: tooling/build.md
+      - Design preview renderer: tooling/preview.md
+      - API verification: tooling/api-check.md
+  - Process:
+      - Spec-driven milestones: process/milestones.md
+      - Decision log: process/decisions.md
+      - Testing and verification: process/verification.md
+  - Reference:
+      - Source map: reference/source-map.md
+      - Constants: reference/constants.md

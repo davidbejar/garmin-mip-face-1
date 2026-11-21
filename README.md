@@ -66,6 +66,17 @@ monkeydo bin/WatchFace.prg fenix8solar47mm
 
 Keep your developer key outside this repository.
 
+## Documentation
+
+Engineering notes (architecture, rendering, memory and power, algorithms, tooling) are in `docs/`, built with
+MkDocs Material:
+
+```sh
+pip install -r requirements-docs.txt
+mkdocs serve                       # http://127.0.0.1:8000
+python3 tools/docs/make_assets.py  # regenerate figures after changing icons, glyphs or layout
+```
+
 ## Project layout
 
 - `design/spec.md`: the full design spec (layout coordinates, type, icons, colours, data sources, fallbacks)

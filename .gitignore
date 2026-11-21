@@ -22,3 +22,6 @@ tools/preview/cache/
 tools/preview/out/
 tools/preview/.venv/
 __pycache__/
+
+# Documentation site build output (mkdocs build)
+site/
