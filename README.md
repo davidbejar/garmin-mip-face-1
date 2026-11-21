@@ -5,7 +5,7 @@ It is designed for the 260 × 260 px always-on MIP (memory-in-pixel) screen and 
 
 ![Normal state](design/v4a-normal.png)
 
-> **Status:** work in progress. The design is final; the code is being built in milestones (see [Roadmap](#roadmap)).
+> **Status:** version 1.0.0 is published on the Connect IQ Store. Engineering notes: https://davidbejar.github.io/garmin-mip-face-1/
 
 ## What it shows
 
@@ -44,6 +44,8 @@ On the watch (this face's settings in the system Watch Face menu), or in Garmin 
 - **Text colour**: black (default), navy, or dark purple
 - **Accent colour**: orange (default), magenta, or amber
 - **Heart-rate label**: resting heart rate (`REST 52`, default) or the 4-hour max (`MAX 127`)
+- **Time font**: Classic (default), Bold, LCD (7-segment, drawn in code), Dot matrix (drawn in code) or Handwritten
+- **Rubber duck mode**: off (default) or on; every 2 in the hours and minutes becomes a yellow rubber duck
 
 The colour options avoid the red, green and blue used by the colour rules, so warnings always stand out.
 
@@ -83,7 +85,9 @@ python3 tools/docs/make_assets.py  # regenerate figures after changing icons, gl
 - `design/*.png`: mockups for the normal, targets-met, and running-low states
 - `CLAUDE.md`: working rules for the project
 
-## Roadmap
+## History
+
+Built in milestones, each committed after a simulator check:
 
 1. Time, seconds, week number, date block
 2. Outlined boxes and side panel: battery, solar, Body Battery, moon
@@ -93,7 +97,11 @@ python3 tools/docs/make_assets.py  # regenerate figures after changing icons, gl
 6. Colour rules
 7. Low-power behaviour
 8. Settings for text colour and accent
+9. Time-font setting and rubber duck mode
+
+Version 1.0.0 (tag `v1.0.0`) was approved by Garmin and published on the Connect IQ Store.
 
 ## License
 
-[MIT](LICENSE). Font assets derived from Barlow / Barlow Condensed, if added later, remain under the SIL Open Font License.
+[MIT](LICENSE). The bitmap fonts in `resources/fonts/` are derived from Barlow, Barlow Condensed, Saira Condensed and
+Kalam and remain under the SIL Open Font License (licence texts alongside them).
