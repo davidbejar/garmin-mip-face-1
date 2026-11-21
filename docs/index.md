@@ -4,7 +4,10 @@
 
 Instrument Panel is a Connect IQ watch face for a 260 × 260 px always-on memory-in-pixel (MIP) display with 64
 colours. It was built from a written design spec in eight milestones, passed Garmin's review, and was published on the
-Connect IQ Store as version 1.0.0.
+[Connect IQ Store](https://apps.garmin.com/en-US/apps/00cf4841-a09d-4a96-972b-a67b8fb4c242) as version 1.0.0.
+
+[:material-watch: Get it on the Connect IQ Store](https://apps.garmin.com/en-US/apps/00cf4841-a09d-4a96-972b-a67b8fb4c242){ .md-button .md-button--primary }
+[:fontawesome-brands-github: Source on GitHub](https://github.com/davidbejar/garmin-mip-face-1){ .md-button }
 
 These pages are about the code rather than the product. They document how a dense, always-on, data-heavy screen fits
 into a small memory budget and a strict power budget. They also cover the tooling built around the code to make
@@ -112,7 +115,7 @@ design decisions measurable.
 | Permissions | `ComplicationSubscriber`, `SensorHistory`, `UserProfile` (nothing else) |
 | Tooling | Python 3 with Pillow and NumPy (font generation, design previews, docs figures), Bash build script |
 | Fonts | Barlow, Barlow Condensed, Saira Condensed, Kalam (SIL Open Font License), converted to bitmap atlases |
-| Distribution | Connect IQ Store, version 1.0.0 (tagged `v1.0.0` in git) |
+| Distribution | [Connect IQ Store](https://apps.garmin.com/en-US/apps/00cf4841-a09d-4a96-972b-a67b8fb4c242), version 1.0.0 (tagged `v1.0.0` in git) |
 
 ## Where to start
 

@@ -5,7 +5,7 @@ It is designed for the 260 × 260 px always-on MIP (memory-in-pixel) screen and 
 
 ![Normal state](design/v4a-normal.png)
 
-> **Status:** version 1.0.0 is published on the Connect IQ Store. Engineering notes: https://davidbejar.github.io/garmin-mip-face-1/
+> **Status:** version 1.0.0 is published on the [Connect IQ Store](https://apps.garmin.com/en-US/apps/00cf4841-a09d-4a96-972b-a67b8fb4c242). Engineering notes: https://davidbejar.github.io/garmin-mip-face-1/
 
 ## What it shows
 
