@@ -82,7 +82,7 @@ Use only the 64 MIP colours: each of red, green and blue is 00, 55, AA or FF.
 | Background | #FFFFFF |
 | Text colour (setting) | default #000000; options #000000 (black), #000055 (navy), #550055 (dark purple) |
 | Accent (setting) | default #FF5500; options #FF5500 (orange), #AA00AA (magenta), #FFAA00 (amber) |
-| Small labels | #555555 |
+| Small labels | #555555 (except the REST / MAX heart-rate label: text colour, changed 2026-11-21 because grey was too light on the watch) |
 | Bar track (unfilled part) | #AAAAAA |
 | Date block text | #FFFFFF |
 | Red: icons and bars | #FF0000 |
@@ -167,7 +167,8 @@ Moon labels: NEW, WAX CRES, 1ST QTR, WAX GIB, FULL, WAN GIB, LAST QTR, WAN CRES.
   - LCD: Casio-style 7-segment digits drawn in code, 47 px, slanted, hard edges.
   - Dot matrix: 5×7 grid of round anti-aliased dots drawn in code, 45 px. The zero is slashed and the 1 has a wide
     foot (after the BRAZEN "GHOSTLINE" face).
-  - Handwritten: Kalam Bold, 35 px digits.
+  - Handwritten: Kalam Bold, 44 px digits, glyphs narrowed to 83.8 % so the widest time still fits (changed 2026-11-21;
+    was 35 px at full width, which looked short next to the other styles).
 - Rubber duck mode (added 2026-11-20): Off (default) or On. When on, every 2 in the hours and minutes (nothing
   else) is drawn as a rubber duck in the 2's own box: yellow body (0xFFFF00), orange beak (0xFF5500, fixed, not the
   accent), outlined in the text colour. The duck is as tall as the digits and no wider than the 2. It has a round

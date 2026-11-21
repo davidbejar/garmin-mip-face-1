@@ -18,11 +18,11 @@ size, with the right edge treatment.
 All fonts come from one declarative table:
 
 ```python
-# name, source TTF, pixel size, glyphs, edge mode, gap[, space[, fixed]]
+# name, source TTF, pixel size, glyphs, edge mode, gap[, space[, fixed[, xscale]]]
 FONTS = [
     ("time",       "BarlowCondensed-SemiBold.ttf", 64, "0123456789:", "aa", None),
     ("time_saira", "SairaCondensed-ExtraBold.ttf", 60, "0123456789:", "aa", None),
-    ("time_kalam", "Kalam-Bold.ttf",               48, "0123456789:", "aa", None),
+    ("time_kalam", "Kalam-Bold.ttf",               58, "0123456789:", "aa", None, None, False, 0.838),
     ("num12", "BarlowCondensed-Bold.ttf",     17, "0123456789%d-,.", "threshold", None),
     ("num13", "BarlowCondensed-Bold.ttf",     18, "0123456789%d-",   "threshold", None),
     ("num11", "BarlowCondensed-Bold.ttf",     14, "0123456789%d-",   "threshold", None),
@@ -149,8 +149,13 @@ Rendered from `resources/fonts/*.png` on a dark tile so the white glyphs are vis
 The two extra time fonts had to fit **exactly** the box the classic time uses: digits at most 47 px tall, and the
 widest possible time at most 127 px including the code's tracking, so the week number always clears the side panel.
 The size in the table is the largest that passes over **all 1,440 times**, found with the
-[preview renderer](../tooling/preview.md). That gives 41 px digits for Saira and 35 px for Kalam, whose
-handwritten glyphs are much wider for their height.
+[preview renderer](../tooling/preview.md). That gives 41 px digits for Saira.
+
+Kalam's handwritten glyphs are much wider for their height: at full width they fit only at 35 px, which looked
+short next to the other styles. The generator's `xscale` option narrows each glyph after rendering, with its offset
+and advance scaled to match. At 83.8 % Kalam reaches 44 px digits and its widest time (`22:28`) still fits. The
+narrowing uses an area-averaging (box) filter, which can't overshoot. A sharper filter such as Lanczos rings at the
+stroke edges, leaving slightly transparent stripes inside solid strokes.
 
 ## Licensing
 

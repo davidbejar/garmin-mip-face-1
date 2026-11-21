@@ -24,21 +24,26 @@ MONTHS = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY",
 #   "threshold" pixels at least half covered are inked; crisp small digits.
 #   "mono"      FreeType's hinted 1-bit render; cleanest stems at tiny sizes.
 #
-# name, source TTF, pixel size, glyphs, edge mode, gap[, space]
+# name, source TTF, pixel size, glyphs, edge mode, gap[, space[, fixed[, xscale]]]
 #   gap None: the font's own spacing (side bearings kept).
 #   gap n:    drop side bearings and space every glyph exactly n px from the
 #             next (xadvance = ink width + n); `space` is the word gap in px.
 #   fixed:    with a gap, every glyph gets the width of the widest one (glyph
 #             centred in its cell), so numbers do not shift as digits change.
+#   xscale:   narrow (< 1) each glyph horizontally after rendering; offsets and
+#             advances scale with it. Makes a wide font taller within a fixed width.
 FONTS = [
     # 64 px as in the spec.
     ("time", "BarlowCondensed-SemiBold.ttf", 64, "0123456789:", "aa", None),
     # Time-font setting (owner's choice 2026-11-20, previews in tools/preview).
     # Each size is the largest whose widest time (with the code's tracking)
     # still fits the 127 px the Barlow time takes at 00:00, so the week number
-    # always clears the side panel: Saira 41 px digits, Kalam 35 px digits.
+    # always clears the side panel: Saira 41 px digits.
     ("time_saira", "SairaCondensed-ExtraBold.ttf", 60, "0123456789:", "aa", None),
-    ("time_kalam", "Kalam-Bold.ttf", 48, "0123456789:", "aa", None),
+    # Kalam is wide: at full width it fits only at 35 px digits. Owner's choice
+    # (option H2, 2026-11-21): 44 px digits, glyphs narrowed to 83.8 % so the
+    # widest time (22:28) still fits the 127 px.
+    ("time_kalam", "Kalam-Bold.ttf", 58, "0123456789:", "aa", None, None, False, 0.838),
     # Small numbers with hard edges (system fonts were too light on the MIP
     # screen). Hinting only lands on some digit heights, so the sizes are the
     # nearest to the mockup:
@@ -91,7 +96,7 @@ HAND_DRAWN = {
 }
 
 
-def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False):
+def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False, xscale=1.0):
     font = ImageFont.truetype(os.path.join(SRC, ttf), size)
     ascent, descent = font.getmetrics()
 
@@ -114,6 +119,8 @@ def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False):
             continue
         ix0, iy0, ix1, iy1 = canvas.getbbox()
         mask = canvas.crop((ix0, iy0, ix1, iy1))
+        if xscale != 1.0:
+            mask = mask.resize((max(1, round(mask.width * xscale)), mask.height), Image.BOX)
         hand = HAND_DRAWN.get(name, {}).get(ch)
         if hand is not None:
             # Replace the rendered glyph; keep it on the baseline.
@@ -126,7 +133,7 @@ def build(name, ttf, size, glyphs, mode, gap, space=None, fixed=False):
         if gap is not None:
             cells.append((ch, mask, 0, iy0 - m, mask.width + gap))
         else:
-            cells.append((ch, mask, ix0 - m, iy0 - m, round(font.getlength(ch))))
+            cells.append((ch, mask, round((ix0 - m) * xscale), iy0 - m, round(font.getlength(ch) * xscale)))
 
     if fixed and gap is not None:
         cell = max(mask.width for _, mask, *_ in cells)

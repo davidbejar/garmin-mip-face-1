@@ -9,7 +9,7 @@ project's rule is that every colour in the source must be one of the 64, and `Pa
 | Role | Value | |
 |------|-------|-|
 | Background | `#FFFFFF` | <span style="display:inline-block;width:1.2em;height:1.2em;background:#FFFFFF;border:1px solid #999"></span> |
-| Small labels | `#555555` | <span style="display:inline-block;width:1.2em;height:1.2em;background:#555555"></span> |
+| Small labels (moon phase, BODY BAT, KM) | `#555555` | <span style="display:inline-block;width:1.2em;height:1.2em;background:#555555"></span> |
 | Bar track | `#AAAAAA` | <span style="display:inline-block;width:1.2em;height:1.2em;background:#AAAAAA"></span> |
 | Red: icons and bars | `#FF0000` | <span style="display:inline-block;width:1.2em;height:1.2em;background:#FF0000"></span> |
 | Red: numbers | `#AA0000` | <span style="display:inline-block;width:1.2em;height:1.2em;background:#AA0000"></span> |
@@ -23,6 +23,10 @@ project's rule is that every colour in the source must be one of the 64, and `Pa
     Each signal colour has a bright shade for **areas** (icons, bars) and a dark shade for **numbers**. Digits
     are thin strokes on white, so they get the darker, higher-contrast shade, while icons and bars, which have more
     area, carry the brighter one.
+
+The `REST` / `MAX` label under the heart rate uses the **text colour** rather than the label grey. It is a value
+the wearer reads, not a caption, and in grey its 1 px letter strokes were too light on the watch. It now matches
+the week number, which uses the same font.
 
 ## Colour rules
 
@@ -80,7 +84,7 @@ smoother. Thin strokes at small sizes look blurred and grey. The face decides pe
 
 | Element | Edges | Why |
 |---------|-------|-----|
-| Classic, Bold, Handwritten time digits | anti-aliased bitmap font | Large glyphs (35–47 px) benefit from smooth curves. |
+| Classic, Bold, Handwritten time digits | anti-aliased bitmap font | Large glyphs (41–47 px) benefit from smooth curves. |
 | Dot-matrix time | anti-aliased `fillCircle` | Round dots at about 6 px look like squares without it. |
 | Rubber duck | anti-aliased polygons and circles | Except in the LCD style, where the segments are hard-edged. |
 | LCD time | hard edges | Matches real 7-segment displays. |

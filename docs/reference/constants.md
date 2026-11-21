@@ -48,7 +48,7 @@ All geometry is in pixels on the 260 × 260 spec canvas and is scaled by `dc.get
 | Bold | 41 | −1.2 | 2's ink box: x offset 1, width 25 |
 | LCD | 47 | — | cell 23, stroke 5, gap 1, slant 0.10, pitch 28, colon 12 |
 | Dot matrix | 45.4 | — | pitch 5.5 × 6.6, dot 5.8, digit gap 0.5 columns, colon dot 3.6 |
-| Handwritten | 35 | 0 | 2's ink box width 27, duck inset 2 |
+| Handwritten | 44 | 0 | glyphs narrowed to 83.8 %, 2's ink box width 27, duck inset 2 |
 
 ## Duck (unit coordinates)
 

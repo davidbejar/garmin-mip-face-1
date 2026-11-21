@@ -12,6 +12,8 @@ spec or a commit message, and has a reason. This page collects them.
 | Text and accent options exclude red, green and blue | A broader list including dark green, dark red, blue, red, green | Those colours would make some colour-rule warnings invisible. |
 | `REST` / `MAX` heart-rate label setting | Resting heart rate only | Added as an option. `MAX` reuses the graph's data (the tallest bar). |
 | Five time styles and rubber duck mode | One time font | Picked from rendered previews. All five fit the original time box exactly. |
+| `REST` / `MAX` label in the text colour (2026-11-21) | Grey like the other small labels | It was too light to read on the watch. It now matches the week number, which uses the same font. |
+| Handwritten at 44 px, glyphs narrowed to 84 % (2026-11-21) | 35 px at full width | It looked short next to the other styles. Chosen from rendered options at 41, 44 and 47 px. |
 | Duck colours fixed (yellow, orange beak) | Beak in the accent colour | A magenta or amber beak no longer reads as a duck. |
 
 ## Engineering decisions

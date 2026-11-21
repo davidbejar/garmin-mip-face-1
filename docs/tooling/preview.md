@@ -37,7 +37,8 @@ def all_times():
 ```
 
 The fitted size and the margin to the side panel are reported for each option, and those numbers went straight
-into `make_fonts.py` (Saira at 41 px digits, Kalam at 35 px).
+into `make_fonts.py` (Saira at 41 px digits). A later round used the same fitting to make Handwritten taller:
+Kalam narrowed to 84 % reaches 44 px digits within the same 127 px.
 
 ## Scripts
 

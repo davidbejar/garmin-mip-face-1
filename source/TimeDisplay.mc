@@ -34,7 +34,8 @@ class TimeDisplay {
     private const TWO_XOFF = [1.0, 1.0, 0.0, 0.0, 0.0] as Array<Float>;
     private const TWO_W = [25.0, 25.0, 0.0, 0.0, 27.0] as Array<Float>;
     // Digit height per style: the duck's height and the week number's top.
-    private const DIGIT_H = [47.0, 41.0, 47.0, 45.4, 35.0] as Array<Float>;
+    // Kalam: 44 px, its glyphs narrowed to fit the width (owner's choice H2, 2026-11-21).
+    private const DIGIT_H = [47.0, 41.0, 47.0, 45.4, 44.0] as Array<Float>;
     // The duck sits 1 px inside the 2's box on the left (2 px for Kalam, whose
     // 1 leans into the next glyph), so it never touches its neighbour.
     private const DUCK_INSET = [1.0, 1.0, 1.0, 1.0, 2.0] as Array<Float>;

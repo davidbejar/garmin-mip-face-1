@@ -617,7 +617,9 @@ class InstrumentPanelView extends WatchUi.WatchFace {
             }
         }
 
-        dc.setColor(Palette.LABEL, Graphics.COLOR_TRANSPARENT);
+        // REST / MAX in the text colour, like the week number (owner's choice L1,
+        // 2026-11-21): grey was too light on the watch. Other labels stay grey.
+        dc.setColor(_ink, Graphics.COLOR_TRANSPARENT);
         dc.drawText(_hrLabelX, _hrLabelTop, _labelFont, _hrLabelText, Graphics.TEXT_JUSTIFY_LEFT);
     }
 

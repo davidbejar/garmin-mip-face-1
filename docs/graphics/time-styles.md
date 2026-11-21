@@ -54,7 +54,7 @@ number and seconds from those values, so it doesn't need to know which style is 
 | Bold | Saira Condensed ExtraBold bitmap font | 41 px | one 4 KB PNG atlas |
 | LCD | 7 hexagonal polygons per digit, slanted | 47 px | no resource |
 | Dot matrix | 5 × 7 grid of anti-aliased circles | 45.4 px | no resource |
-| Handwritten | Kalam Bold bitmap font | 35 px | one 5 KB PNG atlas |
+| Handwritten | Kalam Bold bitmap font, glyphs narrowed to 84 % | 44 px | one 8 KB PNG atlas |
 
 ## Lifecycle: configure, layout, draw
 
