@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 12" width="792" height="108" >
+<rect width="88" height="12" fill="#FFFFFF"/>
+<rect x="1.1" y="0.5" width="3.8" height="0.8" fill="#AAAAAA"/>
+<text x="3.0" y="1.35" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#000000">a</text>
+<rect x="5.1" y="1.5" width="0.8" height="3.8" fill="#AAAAAA"/>
+<text x="5.5" y="3.85" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#000000">b</text>
+<rect x="5.1" y="5.5" width="0.8" height="3.8" fill="#AAAAAA"/>
+<text x="5.5" y="7.85" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#000000">c</text>
+<rect x="1.1" y="9.5" width="3.8" height="0.8" fill="#AAAAAA"/>
+<text x="3.0" y="10.35" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#000000">d</text>
+<rect x="0.1" y="5.5" width="0.8" height="3.8" fill="#AAAAAA"/>
+<text x="0.5" y="7.85" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#000000">e</text>
+<rect x="0.1" y="1.5" width="0.8" height="3.8" fill="#AAAAAA"/>
+<text x="0.5" y="3.85" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#000000">f</text>
+<rect x="1.1" y="5.0" width="3.8" height="0.8" fill="#AAAAAA"/>
+<text x="3.0" y="5.85" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#000000">g</text>
+<rect x="9.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="13.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="13.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="9.1" y="9.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="8.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="8.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="9.1" y="5.0" width="3.8" height="0.8" fill="#EEEEEE"/>
+<text x="11" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">63</text>
+<rect x="17.1" y="0.5" width="3.8" height="0.8" fill="#EEEEEE"/>
+<rect x="21.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="21.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="17.1" y="9.5" width="3.8" height="0.8" fill="#EEEEEE"/>
+<rect x="16.1" y="5.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="16.1" y="1.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="17.1" y="5.0" width="3.8" height="0.8" fill="#EEEEEE"/>
+<text x="19" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">6</text>
+<rect x="25.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="29.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="29.1" y="5.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="25.1" y="9.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="24.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="24.1" y="1.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="25.1" y="5.0" width="3.8" height="0.8" fill="#000000"/>
+<text x="27" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">91</text>
+<rect x="33.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="37.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="37.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="33.1" y="9.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="32.1" y="5.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="32.1" y="1.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="33.1" y="5.0" width="3.8" height="0.8" fill="#000000"/>
+<text x="35" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">79</text>
+<rect x="41.1" y="0.5" width="3.8" height="0.8" fill="#EEEEEE"/>
+<rect x="45.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="45.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="41.1" y="9.5" width="3.8" height="0.8" fill="#EEEEEE"/>
+<rect x="40.1" y="5.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="40.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="41.1" y="5.0" width="3.8" height="0.8" fill="#000000"/>
+<text x="43" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">102</text>
+<rect x="49.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="53.1" y="1.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="53.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="49.1" y="9.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="48.1" y="5.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="48.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="49.1" y="5.0" width="3.8" height="0.8" fill="#000000"/>
+<text x="51" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">109</text>
+<rect x="57.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="61.1" y="1.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="61.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="57.1" y="9.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="56.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="56.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="57.1" y="5.0" width="3.8" height="0.8" fill="#000000"/>
+<text x="59" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">125</text>
+<rect x="65.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="69.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="69.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="65.1" y="9.5" width="3.8" height="0.8" fill="#EEEEEE"/>
+<rect x="64.1" y="5.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="64.1" y="1.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="65.1" y="5.0" width="3.8" height="0.8" fill="#EEEEEE"/>
+<text x="67" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">7</text>
+<rect x="73.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="77.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="77.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="73.1" y="9.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="72.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="72.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="73.1" y="5.0" width="3.8" height="0.8" fill="#000000"/>
+<text x="75" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">127</text>
+<rect x="81.1" y="0.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="85.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="85.1" y="5.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="81.1" y="9.5" width="3.8" height="0.8" fill="#000000"/>
+<rect x="80.1" y="5.5" width="0.8" height="3.8" fill="#EEEEEE"/>
+<rect x="80.1" y="1.5" width="0.8" height="3.8" fill="#000000"/>
+<rect x="81.1" y="5.0" width="3.8" height="0.8" fill="#000000"/>
+<text x="83" y="11.8" font-size="1.3" text-anchor="middle" font-family="monospace" fill="#555555">111</text>
+</svg>
